@@ -1,0 +1,24 @@
+{
+  "name": "ste-writing",
+  "version": "1.0.0",
+  "description": "ASD-STE100 Simplified Technical English mode for the pi coding agent. /ste toggles a controlled writing style that removes ambiguity from prose.",
+  "keywords": ["pi-package", "pi", "ste", "asd-ste100", "simplified-technical-english", "writing", "ai-slop"],
+  "license": "MIT",
+  "author": {
+    "name": "37",
+    "url": "https://github.com/37"
+  },
+  "homepage": "https://github.com/37/ste-writing",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/37/ste-writing.git"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "node tests/smoke.mjs"
+  },
+  "pi": {
+    "extensions": ["./extension/ste-writing.ts"],
+    "skills": ["./skills"]
+  }
+}
