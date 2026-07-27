@@ -1,8 +1,17 @@
 {
   "name": "steward",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "ASD-STE100 Simplified Technical English mode for AI coding agents. /steward toggles a controlled writing style that removes ambiguity from prose.",
-  "keywords": ["pi-package", "pi", "steward", "ste", "asd-ste100", "simplified-technical-english", "writing", "ai-slop"],
+  "keywords": [
+    "pi-package",
+    "pi",
+    "steward",
+    "ste",
+    "asd-ste100",
+    "simplified-technical-english",
+    "writing",
+    "ai-slop"
+  ],
   "license": "MIT",
   "author": {
     "name": "37",
@@ -15,10 +24,14 @@
   },
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.mjs"
+    "test": "node tests/smoke.mjs && bash tests/claude-hook.sh"
   },
   "pi": {
-    "extensions": ["./extension/steward.ts"],
-    "skills": ["./skills"]
+    "extensions": [
+      "./extension/steward.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
   }
 }

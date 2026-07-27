@@ -65,12 +65,14 @@ function onPrompt(promptRaw) {
     return;
   }
 
-  const m = lower.match(/^[/@$]steward\b\s*(.*)$/);
+  // Accept /steward, the plugin-namespaced /steward:steward, and the @/$
+  // prefixes some harnesses substitute for the slash.
+  const m = lower.match(/^[/@$]steward(?::steward)?\b\s*(.*)$/);
   if (!m) return; // ordinary prompt: SessionStart already injected; stay silent
 
   const [sub, ...restParts] = m[1].split(/\s+/).filter(Boolean);
   const rest = restParts.join(" ");
-  const restOriginal = prompt.replace(/^[/@$]steward\b\s*\S*\s*/i, "");
+  const restOriginal = prompt.replace(/^[/@$]steward(?::steward)?\b\s*\S*\s*/i, "");
 
   if (!sub) {
     const mode = readFlag() || core.readConfig().defaultMode;

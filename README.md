@@ -43,6 +43,9 @@ pi install git:github.com/37/steward
 /plugin install steward@steward
 ```
 
+The doubled name is normal: it reads plugin@marketplace, and the bundled
+skill appears as `steward:steward`.
+
 **Codex**
 
 ```bash
