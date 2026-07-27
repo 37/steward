@@ -12,21 +12,32 @@ English](https://asd-ste100.org), a standard built in 1986 so that aircraft
 mechanics anywhere in the world could not misread a maintenance manual.
 Each word gets one meaning. Each sentence gets one job.
 
-## What it does
+## The rules, in short
 
-The same request ("write the error message for a failed deploy"), same AI.
-The "what you can do" steps, side by side:
+- One name for one thing. One meaning per word.
+- Active voice. A verb for an action: "analyze the log", not "perform an
+  analysis of the log".
+- Instructions: maximum 20 words each, one instruction per sentence.
+- One topic per paragraph, maximum 6 sentences.
+- Condition first, then command: "If the test fails, read the log."
+- No semicolons, em-dashes, contractions, Latin abbreviations, marketing
+  adjectives, or empty intensifiers.
+- If a pronoun can point at two nouns, repeat the noun.
 
-| **steward off** (127 words total) | **steward strict** (79 words total) |
-|---|---|
-| 1. Rebuild and republish the artifact, then retry the deploy.<br>2. Verify you are deploying the intended version/tag — a stale local cache can serve an old artifact. Clear the cache and pull again.<br>3. If the registry entry is outdated, update it with the new checksum and retry.<br>4. If none of the above applies, the artifact may have been tampered with. Do not deploy it — contact your registry administrator. | 1. Run the build again to make a clean artifact.<br>2. Compare the new checksum with the registry checksum.<br>3. If the registry entry is old, publish the artifact again.<br>4. If the problem continues, contact the registry administrator. |
+Full digest: [skills/steward/rules-reference.md](skills/steward/rules-reference.md).
+Check any draft: `python3 skills/steward/ste-lint.py your-draft.md`.
 
-More examples with scores: [docs/examples.md](docs/examples.md).
+## Make it yours
 
-Use steward if your assistant writes things people read: docs, READMEs, PR
-descriptions, issues, release notes, error messages. The cost is a few
-hundred prompt tokens per request, mostly absorbed by caching. The honest
-limit: steward fixes the form of writing, not the substance.
+- **Ban a term**: `/steward ban synergy`. The `bare:` prefix bans a word
+  only when it stands alone; the default register ships with `bare:key`,
+  so "rotate the key" gets flagged and "rotate the signing key" passes.
+- **Add a rule in plain words**: `/steward rule No exclamation marks in
+  headings.` Or just tell the assistant "no em-dashes ever".
+- **Dictionary**: `/steward dict on` adds 50 word substitutions
+  (`utilize` > `use`) filtered so software terms survive: the standard
+  would replace "run the tests" with "operate the tests"; steward knows
+  better.
 
 ## Install
 
@@ -67,32 +78,21 @@ git:github.com/37/steward`.
 Or type "stop steward" in chat. Also available: `/steward status`,
 `scope all|artifacts`, `dict on|off`, and `default <mode>`.
 
-## Make it yours
+## Examples
 
-- **Ban a term**: `/steward ban synergy`. The `bare:` prefix bans a word
-  only when it stands alone; the default register ships with `bare:key`,
-  so "rotate the key" gets flagged and "rotate the signing key" passes.
-- **Add a rule in plain words**: `/steward rule No exclamation marks in
-  headings.` Or just tell the assistant "no em-dashes ever".
-- **Dictionary**: `/steward dict on` adds 50 word substitutions
-  (`utilize` > `use`) filtered so software terms survive: the standard
-  would replace "run the tests" with "operate the tests"; steward knows
-  better.
+The same request ("write the error message for a failed deploy"), same AI.
+The "what you can do" steps, side by side:
 
-## The rules, in short
+| **steward off** (127 words total) | **steward strict** (79 words total) |
+|---|---|
+| 1. Rebuild and republish the artifact, then retry the deploy.<br>2. Verify you are deploying the intended version/tag — a stale local cache can serve an old artifact. Clear the cache and pull again.<br>3. If the registry entry is outdated, update it with the new checksum and retry.<br>4. If none of the above applies, the artifact may have been tampered with. Do not deploy it — contact your registry administrator. | 1. Run the build again to make a clean artifact.<br>2. Compare the new checksum with the registry checksum.<br>3. If the registry entry is old, publish the artifact again.<br>4. If the problem continues, contact the registry administrator. |
 
-- One name for one thing. One meaning per word.
-- Active voice. A verb for an action: "analyze the log", not "perform an
-  analysis of the log".
-- Instructions: maximum 20 words each, one instruction per sentence.
-- One topic per paragraph, maximum 6 sentences.
-- Condition first, then command: "If the test fails, read the log."
-- No semicolons, em-dashes, contractions, Latin abbreviations, marketing
-  adjectives, or empty intensifiers.
-- If a pronoun can point at two nouns, repeat the noun.
+More examples with scores: [docs/examples.md](docs/examples.md).
 
-Full digest: [skills/steward/rules-reference.md](skills/steward/rules-reference.md).
-Check any draft: `python3 skills/steward/ste-lint.py your-draft.md`.
+Use steward if your assistant writes things people read: docs, READMEs, PR
+descriptions, issues, release notes, error messages. The cost is a few
+hundred prompt tokens per request, mostly absorbed by caching. The honest
+limit: steward fixes the form of writing, not the substance.
 
 ## Credits
 
