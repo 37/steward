@@ -22,6 +22,17 @@ of that discipline: steward's measurable delta is largest where the baseline
 style has room to sprawl, and the structural differences in the PR example
 below still show what steward changes.
 
+A later rerun of the full matrix (after an internal refactor) confirmed the
+variance shape: the treated runs held their scores (three exact 0.00
+repeats; lite within 0.05), while the baselines swung by 4 to 6 points in
+both directions. The 0.00 PR baseline above was partly a lucky draw; the
+rerun baseline produced three em-dashes and 4.00 on the same prompt. Read
+the steward columns as a stable floor and the off column as one sample from
+a wide distribution. The rerun also exposed a linter false positive:
+vertical-list steps counted as one long paragraph. STE rule 4.3 prescribes
+vertical lists, so the linter now excludes list items from the
+paragraph-length check.
+
 ## Token cost (measured from the injected block)
 
 | Configuration | Injected tokens (approx.) |

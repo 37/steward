@@ -111,7 +111,12 @@ def lint(text):
             reg_hits += c
     v["user_register"] = reg_hits
     paras = [p for p in re.split(r"\n\s*\n", raw) if p.strip()]
-    v["long_paragraph(>6s)"] = sum(1 for p in paras if len(sentences(strip_code(p))) > 6)
+    # STE rule 4.3 prescribes vertical lists; list items are steps, not paragraph
+    # sentences. Drop them before the paragraph-length check.
+    def para_sentences(p):
+        prose = "\n".join(l for l in p.split("\n") if not re.match(r"^\s*(?:[-*+]|\d+[.)])\s", l))
+        return sentences(strip_code(prose))
+    v["long_paragraph(>6s)"] = sum(1 for p in paras if len(para_sentences(p)) > 6)
     em = raw.count("—") + raw.count("–")
     v["em_dash"] = em
     total = sum(v.values())
