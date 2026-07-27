@@ -11,9 +11,9 @@ outputs below are the actual responses, unedited. Scores come from
 
 | Prompt | off | lite | strict |
 |---|---|---|---|
-| Pull-request description | 5.16 | 0.00 | **0.00** |
-| Deploy error message | 9.45 (2 em-dashes) | 0.90 | **0.00** |
 | Tracker issue filing | 5.66 | **0.00** | 0.00 |
+| Deploy error message | 9.45 (2 em-dashes) | 0.90 | **0.00** |
+| Pull-request description | 5.16 | 0.00 | **0.00** |
 | Long-form upstream-PR notes | 5.85 | 0.23 | 0.28 |
 | Words (PR description) | 155 | 118 | 84 |
 | Words (error) | 127 | 111 | 79 |
@@ -53,70 +53,29 @@ words (off) to 79 (strict).
 
 ---
 
-## Prompt 1: Pull-request description
+## Prompt 1: Tracker issue filing (title excerpt)
 
-> Draft a pull request description for my review. Context: the branch
-> replaces a hand-rolled JSON config parser with a schema-validated loader,
-> removes 3 duplicated validation helpers, migrates 9 call sites, and adds a
-> migration note for one breaking rename (configPath to config_path).
+> Write the issue text worth filing in the tracker for my review and
+> signoff. Finding: the export endpoint returns HTTP 200 with an empty body
+> when the date filter excludes all rows, and downstream jobs treat the
+> empty body as corruption and retry for hours.
 
-### off (5.16 warnings/100w, 155 words)
+The full outputs run 235 to 389 words (off 5.66, lite and strict 0.00
+warnings/100w). The titles alone carry the story:
 
-> ## Replace hand-rolled JSON config parser with schema-validated loader
->
-> ### Summary
-> Replaces the custom JSON config parser with a schema-validated loader. Validation now happens in one place at load time instead of being scattered across ad-hoc helpers.
->
-> ### Changes
-> - **New loader:** config is parsed and validated against a schema at load time; invalid configs fail fast with actionable errors instead of surfacing as downstream `KeyError`/type failures.
-> - **Removed:** 3 duplicated validation helpers, now covered by the schema.
-> - **Migrated:** 9 call sites updated to use the new loader.
->
-> ### ⚠️ Breaking change
-> The config key `configPath` is renamed to `config_path`.
->
-> **Migration:** update any config files or overrides referencing `configPath`:
->
-> ```diff
-> - "configPath": "./config.json"
-> + "config_path": "./config.json"
-> ```
->
-> Configs still using the old key will fail schema validation with an unknown-key error at startup.
->
-> ### Testing
-> - Existing config-loading tests updated for the new loader.
-> - Invalid-config cases now exercised through schema validation.
->
-> ### Notes for reviewers
-> - The helper removals and call-site migrations are mechanical; the interesting review surface is the schema definition and the loader's error handling.
+**off** (24 words, one em-dash):
 
-An emoji warning header, "actionable errors", "the interesting review
-surface", and a diff block for a one-word rename.
+> Export endpoint returns HTTP 200 with empty body when date filter matches
+> zero rows — downstream jobs misinterpret as corruption and retry
+> indefinitely
 
-### strict (0.00 warnings/100w, 84 words)
+**strict**:
 
-> ## Summary
->
-> This change replaces the hand-rolled JSON config parser with a schema-validated loader. The loader validates each config file against a schema at load time and rejects invalid files with a validation error.
->
-> ## Changes
->
-> - Replace the hand-rolled JSON config parser with a schema-validated loader.
-> - Remove 3 duplicated validation helpers. The schema now does these checks.
-> - Migrate 9 call sites to the new loader.
->
-> ## Breaking change
->
-> This change renames the `configPath` option to `config_path`.
->
-> Migration steps:
->
-> 1. Search your code and config files for `configPath`.
-> 2. Replace each use with `config_path`.
+> Export endpoint returns HTTP 200 with an empty body when the date filter
+> excludes all rows
 
-Half the words. The migration note became two imperative steps a reader can
-execute.
+The off title tries to tell the whole incident. The strict title names the
+defect and lets the severity field and summary do their jobs.
 
 ## Prompt 2: Deploy error message
 
@@ -175,29 +134,36 @@ with the same information structure.
 
 ---
 
-## Prompt 3: Tracker issue filing (title excerpt)
+## Prompt 3: Pull-request description (excerpt)
 
-> Write the issue text worth filing in the tracker for my review and
-> signoff. Finding: the export endpoint returns HTTP 200 with an empty body
-> when the date filter excludes all rows, and downstream jobs treat the
-> empty body as corruption and retry for hours.
+> Draft a pull request description for my review. Context: [...] a
+> migration note for one breaking rename (configPath to config_path).
 
-The full outputs run 235 to 389 words (off 5.66, lite and strict 0.00
-warnings/100w). The titles alone carry the story:
+Full outputs: off 155 words at 5.16 warnings/100w, strict 84 words at 0.00.
+The breaking-change section shows the difference:
 
-**off** (24 words, one em-dash):
+**off** (plus an emoji header and a diff block for a one-word rename):
 
-> Export endpoint returns HTTP 200 with empty body when date filter matches
-> zero rows — downstream jobs misinterpret as corruption and retry
-> indefinitely
+> ### ⚠️ Breaking change
+> The config key `configPath` is renamed to `config_path`.
+> **Migration:** update any config files or overrides referencing `configPath`: [...]
 
 **strict**:
 
-> Export endpoint returns HTTP 200 with an empty body when the date filter
-> excludes all rows
+> ## Breaking change
+>
+> This change renames the `configPath` option to `config_path`.
+>
+> Migration steps:
+>
+> 1. Search your code and config files for `configPath`.
+> 2. Replace each use with `config_path`.
 
-The off title tries to tell the whole incident. The strict title names the
-defect and lets the severity field and summary do their jobs.
+The strict version tells the reader what to do, in steps a reader can
+execute. Half the words overall.
+
+---
+
 
 ## When steward adds nothing (honest case)
 
