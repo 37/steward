@@ -104,6 +104,12 @@ persists in the session file and survives a restart of that session.
 The full digest with rule numbers is in
 [skills/steward/rules-reference.md](skills/steward/rules-reference.md).
 
+## Measured examples
+
+[docs/examples.md](docs/examples.md) shows three prompts run off/lite/strict
+with the actual outputs side by side. Headline: README intro 6.61 → 0.00
+violations per 100 words, deploy error 9.45 → 0.00 with 38% fewer words.
+
 ## Token cost
 
 The injected block costs approximately 310 tokens (lite) or 450 tokens
