@@ -15,14 +15,12 @@ Each word gets one meaning. Each sentence gets one job.
 ## A better writing system for AI models
 
 - One name for one thing. One meaning per word.
-- Hundreds of controlled words, each with one allowed meaning and one
-  approved part of speech. For example: "to fall" has the approved meaning
-  of "to move down by the force of gravity", and not "to decrease".
-- Active voice. A verb for an action: "analyze the log", not "perform an
-  analysis of the log".
+- Registers hundreds of controlled words with one allowed meaning and a pattern of use. For example: "to fall" has approved for meaning
+  "to move down by the force of gravity", and not "to decrease".
+- Verbs are used for actions: "review the logs", not "perform a review of the logs".
 - Instructions: maximum 20 words each, one instruction per sentence.
 - One topic per paragraph, maximum 6 sentences.
-- Condition first, then command: "If the test fails, read the log."
+- Condition first, then command: "If the test fails, review the log."
 - No semicolons, em-dashes, contractions, Latin abbreviations, marketing
   adjectives, or empty intensifiers.
 - If a pronoun can point at two nouns, repeat the noun.
