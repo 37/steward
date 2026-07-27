@@ -154,9 +154,44 @@ export default function stewardExtension(pi: any) {
     ctx?.ui?.notify?.(`steward mode: ${mode}${mode === "off" ? "" : `, scope: ${scope}`}`, "info");
   }
 
+  function completions(prefix: string): Array<{ value: string; label: string }> | null {
+    const parts = prefix.split(/\s+/);
+    const cfg = readConfig();
+    let cands: Array<{ value: string; label: string }> = [];
+    if (parts.length <= 1) {
+      const top: Array<[string, string]> = [
+        ["lite", "prose discipline, vocabulary open"],
+        ["strict", "full rule set + length caps"],
+        ["off", "deactivate for this session"],
+        ["status", "mode, scope, dict, register counts"],
+        ["scope", "all | artifacts"],
+        ["dict", "dictionary tier on | off"],
+        ["ban", "ban a term (bare: prefix = unqualified only)"],
+        ["unban", "remove a banned term"],
+        ["rule", "add a free-text rule"],
+        ["unrule", "remove a rule by number"],
+        ["rules", "list the register"],
+        ["default", "save startup mode"],
+      ];
+      cands = top.map(([v, l]) => ({ value: v, label: `${v} - ${l}` }));
+    } else {
+      const sub = parts[0].toLowerCase();
+      const second = (word: string[]) => word.map((v) => ({ value: `${sub} ${v}`, label: v }));
+      if (sub === "scope") cands = second(SCOPES);
+      else if (sub === "dict") cands = second(["on", "off"]);
+      else if (sub === "default") cands = second(MODES);
+      else if (sub === "unban") cands = second(cfg.banned);
+      else if (sub === "unrule")
+        cands = cfg.rules.map((r, i) => ({ value: `unrule ${i + 1}`, label: `#${i + 1}: ${r.slice(0, 50)}` }));
+    }
+    const filtered = cands.filter((c) => c.value.startsWith(prefix.trimStart().toLowerCase()));
+    return filtered.length ? filtered : null;
+  }
+
   pi.registerCommand("steward", {
     description:
-      "STE writing mode. Modes: lite|strict|off. Commands: status, scope all|artifacts, dict on|off, ban <term>, unban <term>, rule <text>, unrule <n>, rules, default <mode>",
+      "STE writing mode. Modes: lite|strict|off. Commands: status, scope, dict, ban, unban, rule, unrule, rules, default",
+    getArgumentCompletions: (prefix: string) => completions(prefix),
     handler: async (args: string, ctx: any) => {
       const input = String(args || "").trim();
       const [primary, ...restParts] = input.split(/\s+/);

@@ -91,3 +91,20 @@ function boot() {
 }
 
 console.log("smoke: all checks passed");
+
+// argument completions: top-level, contextual second-level, live register values
+{
+  let opts;
+  const pi2 = { registerCommand: (_n, o) => { opts = o; }, on: () => {}, appendEntry: () => {} };
+  (await import("../extension/steward.ts")).default(pi2);
+  const top = opts.getArgumentCompletions("");
+  assert.ok(top.some((c) => c.value === "lite") && top.some((c) => c.value === "ban"), "top-level completions");
+  const sc = opts.getArgumentCompletions("scope ");
+  assert.ok(sc.some((c) => c.value === "scope artifacts"), "contextual scope completion");
+  writeFileSync(process.env.STEWARD_CONFIG, JSON.stringify({ defaultMode: "lite", scope: "all", dict: false, banned: ["bare:key", "synergy"], rules: ["No emoji."] }));
+  const ub = opts.getArgumentCompletions("unban ");
+  assert.ok(ub.some((c) => c.value === "unban synergy"), "unban completes live banned list");
+  const ur = opts.getArgumentCompletions("unrule ");
+  assert.ok(ur.some((c) => c.value === "unrule 1"), "unrule completes live rule indices");
+}
+console.log("smoke: completions passed");
