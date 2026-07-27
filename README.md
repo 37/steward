@@ -12,7 +12,7 @@ English](https://asd-ste100.org), a standard built in 1986 so that aircraft
 mechanics anywhere in the world could not misread a maintenance manual.
 Each word gets one meaning. Each sentence gets one job.
 
-## A better writing system for AI models
+## A better writing system for technical tasks
 
 - One name for one thing. One meaning per word.
 - Registers hundreds of controlled words with one allowed meaning and a pattern of use. For example: "to fall" has approved for meaning
