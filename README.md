@@ -1,4 +1,19 @@
-# steward
+<p align="center">
+  <img src="assets/logo.png" width="140" alt="steward">
+</p>
+
+<h1 align="center">steward</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/tag/37/steward?style=flat-square&color=1a2b4a&label=release" alt="Release">
+  <img src="https://img.shields.io/badge/works%20with-pi%20%C2%B7%20Claude%20Code%20%C2%B7%20Codex-1a2b4a?style=flat-square" alt="Works with 3 agents">
+  <img src="https://img.shields.io/badge/license-MIT-1a2b4a?style=flat-square" alt="MIT license">
+</p>
+
+<p align="center">
+  <strong>6-9 → 0-1 style warnings per 100 words · 12-45% fewer words · same information</strong><br>
+  <sub>Measured on real writing tasks, three agents, identical prompts. <a href="docs/examples.md">Full outputs and scores</a>.</sub>
+</p>
 
 steward makes your AI coding assistant write clear, short prose instead of
 bloated "AI slop". Turn it on, and every README, error message, pull-request
@@ -29,11 +44,10 @@ with steward off and on:
 > 3. If the registry entry is old, publish the artifact again.
 > 4. If the problem continues, contact the registry administrator.
 
-Full outputs and scores for three tasks are in
-[docs/examples.md](docs/examples.md). Across measured runs, steward took
-this AI's writing from 6 to 9 style faults per 100 words down to 0 to 1,
-with 12 to 38 percent fewer words. The same gradient held inside Claude
-Code ([docs/portability.md](docs/portability.md)).
+Full outputs and scores are in [docs/examples.md](docs/examples.md): a
+pull-request description, an error message, and a tracker issue, all from
+real-workflow prompt shapes. The same gradient held inside Claude Code and
+Codex ([docs/portability.md](docs/portability.md)).
 
 ## Is it worth using?
 
@@ -59,31 +73,52 @@ Restart pi or run `/reload`. Done: steward starts in lite mode.
 
 ### Claude Code
 
+Two prompts in any session:
+
+```
+/plugin marketplace add 37/steward
+/plugin install steward@steward
+```
+
+Review and trust the two lifecycle hooks when asked, start a new session,
+and type `/steward status` to check. Manual alternative (no plugin system):
+
 ```bash
 git clone https://github.com/37/steward ~/.claude/steward
 bash ~/.claude/steward/claude/install.sh
 ```
 
-Start a new session and type `/steward status` to check. The installer only
-adds two hooks to your Claude settings and links the skill; it is safe to
-re-run. Details and validation results:
-[docs/portability.md](docs/portability.md).
+Details and validation results: [docs/portability.md](docs/portability.md).
 
 ### Codex
 
 ```bash
-git clone https://github.com/37/steward ~/.codex/steward
-node ~/.codex/steward/codex/steward-codex.cjs lite    # or strict
+codex plugin marketplace add 37/steward
+codex plugin add steward@steward
 ```
 
-Codex has no live commands, so this writes the rules into
-`~/.codex/AGENTS.md` (your other content stays untouched). Changes apply to
-the next session. Run the same command with `off` to remove, `refresh` to
-update.
+Manual alternative: clone the repo and run
+`node steward/codex/steward-codex.cjs lite` (or `strict`). This writes the
+rules into `~/.codex/AGENTS.md` and leaves your other content untouched.
+Changes apply to the next session. Run the same command with `off` to
+remove, `refresh` to update.
 
 All three agents share one config file
 (`~/.config/steward/config.json`), so your settings follow you across
 agents.
+
+### Uninstall
+
+Plugin installs: remove through the agent's plugin manager. pi:
+`pi remove git:github.com/37/steward`. Manual installs:
+
+```bash
+node steward/scripts/uninstall.cjs
+```
+
+This removes the Claude hooks, the skill link, the mode flag, and the Codex
+block. Your config file stays; delete `~/.config/steward/config.json` to
+reset everything.
 
 ## Daily use
 

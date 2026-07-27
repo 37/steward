@@ -1,0 +1,32 @@
+{
+  "name": "steward",
+  "version": "1.2.0",
+  "description": "ASD-STE100 Simplified Technical English writing mode. Clear, short, unambiguous prose from your agent.",
+  "author": {
+    "name": "37",
+    "url": "https://github.com/37"
+  },
+  "homepage": "https://github.com/37/steward",
+  "repository": "https://github.com/37/steward",
+  "license": "MIT",
+  "keywords": ["writing", "ste", "asd-ste100", "documentation", "clarity"],
+  "skills": "./skills/",
+  "hooks": "./claude/plugin-hooks.json",
+  "interface": {
+    "displayName": "steward",
+    "shortDescription": "Simplified Technical English writing mode",
+    "longDescription": "Applies the ASD-STE100 aircraft-manual writing standard to agent prose: one meaning per word, short sentences, active voice, no filler.",
+    "developerName": "37",
+    "category": "Productivity",
+    "capabilities": ["Instructions", "Lifecycle hooks"],
+    "websiteURL": "https://github.com/37/steward",
+    "defaultPrompt": [
+      "/steward strict",
+      "/steward status",
+      "Rewrite this README section in Simplified Technical English."
+    ],
+    "brandColor": "#1a2b4a",
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/logo.png"
+  }
+}

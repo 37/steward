@@ -1,0 +1,11 @@
+{
+  "name": "steward",
+  "version": "1.2.0",
+  "description": "ASD-STE100 Simplified Technical English writing mode. Clear, short, unambiguous prose from your agent.",
+  "author": {
+    "name": "37",
+    "url": "https://github.com/37"
+  },
+  "hooks": "./claude/plugin-hooks.json",
+  "skills": "./skills/"
+}

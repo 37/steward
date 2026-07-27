@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "steward",
+  "description": "ASD-STE100 Simplified Technical English writing mode for AI agents.",
+  "owner": {
+    "name": "37",
+    "url": "https://github.com/37"
+  },
+  "plugins": [
+    {
+      "name": "steward",
+      "description": "Makes the agent write clear, short, unambiguous prose. Aircraft-manual rules, applied to AI output.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
