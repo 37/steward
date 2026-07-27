@@ -9,7 +9,13 @@
   "homepage": "https://github.com/37/steward",
   "repository": "https://github.com/37/steward",
   "license": "MIT",
-  "keywords": ["writing", "ste", "asd-ste100", "documentation", "clarity"],
+  "keywords": [
+    "writing",
+    "ste",
+    "asd-ste100",
+    "documentation",
+    "clarity"
+  ],
   "skills": "./skills/",
   "hooks": "./claude/plugin-hooks.json",
   "interface": {
@@ -18,15 +24,16 @@
     "longDescription": "Applies the ASD-STE100 aircraft-manual writing standard to agent prose: one meaning per word, short sentences, active voice, no filler.",
     "developerName": "37",
     "category": "Productivity",
-    "capabilities": ["Instructions", "Lifecycle hooks"],
+    "capabilities": [
+      "Instructions",
+      "Lifecycle hooks"
+    ],
     "websiteURL": "https://github.com/37/steward",
     "defaultPrompt": [
       "/steward strict",
       "/steward status",
       "Rewrite this README section in Simplified Technical English."
     ],
-    "brandColor": "#1a2b4a",
-    "logo": "./assets/logo.png",
-    "composerIcon": "./assets/logo.png"
+    "brandColor": "#1a2b4a"
   }
 }
