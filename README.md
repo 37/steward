@@ -14,16 +14,20 @@ Each word gets one meaning. Each sentence gets one job.
 
 ## A better writing system for technical tasks
 
-- One name for one thing. One meaning per word.
-- Registers hundreds of controlled words with one allowed meaning and a pattern of use. For example: "to fall" has approved for meaning
-  "to move down by the force of gravity", and not "to decrease".
+- One name for one thing. One meaning per word. Do not call the same thing
+  "config", "settings", and "preferences": pick one name and keep it.
+- Registers hundreds of controlled words with one allowed meaning and a
+  pattern of use. "To fall" means "to move down by the force of gravity",
+  not "to decrease". "May" grants permission; "can" states ability.
 - Verbs are used for actions: "review the logs", not "perform a review of the logs".
 - Instructions: maximum 20 words each, one instruction per sentence.
 - One topic per paragraph, maximum 6 sentences.
 - Condition first, then command: "If the test fails, review the log."
 - No semicolons, em-dashes, contractions, Latin abbreviations, marketing
   adjectives, or empty intensifiers.
-- If a pronoun can point at two nouns, repeat the noun.
+- If a pronoun can point at two nouns, repeat the noun. "If you engage the
+  pins incorrectly with the seats, they can become damaged." Which gets
+  damaged? Write "the pins can become damaged".
 
 Full digest: [skills/steward/rules-reference.md](skills/steward/rules-reference.md).
 Check any draft: `python3 skills/steward/ste-lint.py your-draft.md`.

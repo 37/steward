@@ -1,10 +1,14 @@
 # ASD-STE100 Issue 9: rule digest
 
 All 53 rules plus 8 general recommendations, condensed from the official spec
-(January 2025). Rule numbers match the standard. Part 2 (the dictionary: 875
-approved words, 1274 non-approved words with approved alternatives) is not
-reproduced here; use the free spec at asd-ste100.org when a dictionary lookup
-matters.
+(January 2025). Rule numbers match the standard.
+
+For the dictionary (Part 2: 875 approved words, 1274 non-approved words with
+approved alternatives), this package ships a distilled software-focused
+subset in [dictionary.json](dictionary.json): 50 substitution pairs plus the
+documented overrides where the standard conflicts with software terminology
+(run, build, call, execute, and more). For a word that is not in the subset,
+use the free spec at asd-ste100.org.
 
 ## Section 1: Words
 
