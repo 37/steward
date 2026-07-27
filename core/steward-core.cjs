@@ -111,7 +111,7 @@ Core rules:
 - Condition first, comma, then command.
 - One topic per paragraph, max 6 sentences. Steps go in numbered lists, imperative form.
 - No contractions. Keep articles (a, an, the, this, these). Keep "that" after verbs like "make sure" and "show".
-- If a pronoun can point at two nouns, repeat the noun.
+- If a pronoun can point at two nouns, repeat the noun. If "this" points at a whole sentence rather than a noun, restate the noun ("this spread", "this check").
 - No semicolons, em-dashes, or en-dashes. No Latin abbreviations ("e.g." > "for example").
 - No marketing adjectives, no empty intensifiers. State claims plainly.
 STE governs clarity, not volume. Do not pad; compression rules still apply.${strictExtra}${cfg.dict ? dictTier() : ""}${registerBlock(cfg)}

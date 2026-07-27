@@ -139,7 +139,8 @@ Your own rules ride along with the built-in ones and live in
 - Condition first, then command: "If the test fails, read the log."
 - No semicolons, em-dashes, contractions, Latin abbreviations, marketing
   adjectives, or empty intensifiers.
-- If a pronoun can point at two nouns, repeat the noun.
+- If a pronoun can point at two nouns, repeat the noun. If "this" points at
+  a whole sentence, restate the noun ("this spread", "this check").
 
 The full 53-rule digest:
 [skills/steward/rules-reference.md](skills/steward/rules-reference.md).
