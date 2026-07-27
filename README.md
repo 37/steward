@@ -12,9 +12,12 @@ English](https://asd-ste100.org), a standard built in 1986 so that aircraft
 mechanics anywhere in the world could not misread a maintenance manual.
 Each word gets one meaning. Each sentence gets one job.
 
-## The rules, in short
+## A better writing system for AI models
 
 - One name for one thing. One meaning per word.
+- Hundreds of controlled words, each with one allowed meaning and one
+  approved part of speech. For example: "to fall" has the approved meaning
+  of "to move down by the force of gravity", and not "to decrease".
 - Active voice. A verb for an action: "analyze the log", not "perform an
   analysis of the log".
 - Instructions: maximum 20 words each, one instruction per sentence.
