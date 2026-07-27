@@ -27,22 +27,15 @@ applies that standard to AI output and stands guard over your prose.
 
 ## What it does, in one example
 
-The same request ("write the error message for a failed deploy"), same AI,
-with steward off and on:
+The same request ("write the error message for a failed deploy"), same AI.
+The "what you can do" steps, side by side:
 
-**Off** (127 words, em-dashes, two instructions per step):
+| **steward off** (127 words total) | **steward strict** (79 words total) |
+|---|---|
+| 1. Rebuild and republish the artifact, then retry the deploy.<br>2. Verify you are deploying the intended version/tag — a stale local cache can serve an old artifact. Clear the cache and pull again.<br>3. If the registry entry is outdated, update it with the new checksum and retry.<br>4. If none of the above applies, the artifact may have been tampered with. Do not deploy it — contact your registry administrator. | 1. Run the build again to make a clean artifact.<br>2. Compare the new checksum with the registry checksum.<br>3. If the registry entry is old, publish the artifact again.<br>4. If the problem continues, contact the registry administrator. |
 
-> 2. Verify you are deploying the intended version/tag — a stale local
->    cache can serve an old artifact. Clear the cache and pull again.
-> ...
-> The deploy was aborted; nothing was changed.
-
-**On, strict mode** (79 words, one instruction per step):
-
-> 1. Run the build again to make a clean artifact.
-> 2. Compare the new checksum with the registry checksum.
-> 3. If the registry entry is old, publish the artifact again.
-> 4. If the problem continues, contact the registry administrator.
+One instruction per step on the right. Em-dashes, hedges, and doubled
+instructions on the left.
 
 Full outputs and scores are in [docs/examples.md](docs/examples.md): a
 pull-request description, an error message, and a tracker issue, all from

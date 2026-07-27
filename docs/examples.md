@@ -9,15 +9,14 @@ outputs below are the actual responses, unedited. Scores come from
 
 ## Scores
 
+Style warnings per 100 words (word counts sit with each prompt below):
+
 | Prompt | off | lite | strict |
 |---|---|---|---|
 | Tracker issue filing | 5.66 | **0.00** | 0.00 |
 | Deploy error message | 9.45 (2 em-dashes) | 0.90 | **0.00** |
 | Pull-request description | 5.16 | 0.00 | **0.00** |
 | Long-form upstream-PR notes | 5.85 | 0.23 | 0.28 |
-| Words (PR description) | 155 | 118 | 84 |
-| Words (error) | 127 | 111 | 79 |
-| Words (upstream notes) | 650 | 434 | 358 |
 
 Two honest caveats. First, these are single runs, not averages. Second, the
 test environment already carries other anti-slop instructions (a terse chat
@@ -63,16 +62,9 @@ words (off) to 79 (strict).
 The full outputs run 235 to 389 words (off 5.66, lite and strict 0.00
 warnings/100w). The titles alone carry the story:
 
-**off** (24 words, one em-dash):
-
-> Export endpoint returns HTTP 200 with empty body when date filter matches
-> zero rows — downstream jobs misinterpret as corruption and retry
-> indefinitely
-
-**strict**:
-
-> Export endpoint returns HTTP 200 with an empty body when the date filter
-> excludes all rows
+| **off** (24 words, one em-dash) | **strict** |
+|---|---|
+| Export endpoint returns HTTP 200 with empty body when date filter matches zero rows — downstream jobs misinterpret as corruption and retry indefinitely | Export endpoint returns HTTP 200 with an empty body when the date filter excludes all rows |
 
 The off title tries to tell the whole incident. The strict title names the
 defect and lets the severity field and summary do their jobs.
@@ -83,7 +75,7 @@ defect and lets the severity field and summary do their jobs.
 > artifact checksum does not match the checksum in the registry. Include
 > what the user can do next.
 
-### off (9.45 violations/100w, 127 words)
+### off (9.45 warnings/100w, 127 words)
 
 > Deploy failed: artifact checksum mismatch.
 >
@@ -110,7 +102,7 @@ defect and lets the severity field and summary do their jobs.
 Em-dashes inside numbered steps, two instructions per step, a semicolon in
 the closing line.
 
-### strict (0.00 violations/100w, 79 words)
+### strict (0.00 warnings/100w, 79 words)
 
 > Deploy failed: artifact checksum mismatch.
 >
@@ -142,22 +134,9 @@ with the same information structure.
 Full outputs: off 155 words at 5.16 warnings/100w, strict 84 words at 0.00.
 The breaking-change section shows the difference:
 
-**off** (plus an emoji header and a diff block for a one-word rename):
-
-> ### ⚠️ Breaking change
-> The config key `configPath` is renamed to `config_path`.
-> **Migration:** update any config files or overrides referencing `configPath`: [...]
-
-**strict**:
-
-> ## Breaking change
->
-> This change renames the `configPath` option to `config_path`.
->
-> Migration steps:
->
-> 1. Search your code and config files for `configPath`.
-> 2. Replace each use with `config_path`.
+| **off** (plus a diff block for a one-word rename) | **strict** |
+|---|---|
+| ⚠️ **Breaking change**<br>The config key `configPath` is renamed to `config_path`.<br>**Migration:** update any config files or overrides referencing `configPath`: [...] | **Breaking change**<br>This change renames the `configPath` option to `config_path`.<br>Migration steps:<br>1. Search your code and config files for `configPath`.<br>2. Replace each use with `config_path`. |
 
 The strict version tells the reader what to do, in steps a reader can
 execute. Half the words overall.
