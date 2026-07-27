@@ -1,6 +1,6 @@
 ---
 name: steward
-description: Write or rewrite prose in ASD-STE100 Simplified Technical English (Issue 9). Applies to documentation, READMEs, PR descriptions, commit message bodies, Linear issues/comments/status updates, rpiv artifacts, handoffs, release notes, and error messages: never code, identifiers, or command syntax. Use when asked to write or edit any of these surfaces, to make writing clear or plain, to remove AI slop, or when the user invokes "steward", "ste", "STE", or "simplified technical english". Two modes: strict (procedures, runbooks, safety text, error messages) and flavored (general prose).
+description: Write or rewrite prose in ASD-STE100 Simplified Technical English (Issue 9). Applies to documentation, READMEs, PR descriptions, commit message bodies, Linear issues/comments/status updates, rpiv artifacts, handoffs, release notes, and error messages: never code, identifiers, or command syntax. Use when asked to write or edit any of these surfaces, to make writing clear or plain, to remove AI slop, or when the user invokes "steward", "ste", "STE", or "simplified technical english". Two modes: strict (procedures, runbooks, safety text, error messages) and lite (general prose).
 ---
 
 # steward
@@ -82,10 +82,20 @@ Write only the requested text. No preamble, no summary, no closing remarks.
 - **strict**: procedures, runbooks, error messages, safety text, anything a
   reader executes under stress: every rule, both length caps, imperative
   steps.
-- **flavored** (default): READMEs, PR descriptions, Linear issues, rpiv
+- **lite** (default): READMEs, PR descriptions, Linear issues, rpiv
   artifacts, handoffs: sentence/paragraph caps, active voice, one-name-one-
   thing, banned-word discipline. Vocabulary stays open; do not force the
   875-word dictionary onto general prose.
+
+User register: `~/.pi/agent/steward.json` carries `banned` (terms; `bare:`
+prefix = flag only unqualified use) and `rules` (free-text edicts). When a
+user asks for a writing rule ("no em-dashes"), add it with `/steward rule`
+or `/steward ban` instead of editing this skill.
+
+Dictionary: [dictionary.json](dictionary.json) holds the distilled STE
+substitution pairs (keep) and the SE-conflict overrides (words STE restricts
+but software uses precisely: run, build, call, execute, return...). Use it
+for lookups; `/steward dict on` injects the top pairs ambiently.
 
 Surface → mode map for this user's workflows:
 
@@ -93,10 +103,10 @@ Surface → mode map for this user's workflows:
 |---|---|---|
 | Error messages, runbooks, ops procedures | strict | Reader acts under stress |
 | Release notes, changelog entries | strict | One change per line, past tense |
-| PR descriptions, commit bodies | flavored | What/why first, steps as lists |
-| Linear issues, comments, status updates | flavored | Condition→action for repro steps (strict) |
-| rpiv artifacts, handoffs | flavored | Headings carry structure; keep 6.1 gradual-information |
-| READMEs, docs | flavored | First paragraph: what it is, what it does, in ≤3 sentences |
+| PR descriptions, commit bodies | lite | What/why first, steps as lists |
+| Linear issues, comments, status updates | lite | Condition→action for repro steps (strict) |
+| rpiv artifacts, handoffs | lite | Headings carry structure; keep 6.1 gradual-information |
+| READMEs, docs | lite | First paragraph: what it is, what it does, in ≤3 sentences |
 
 ## Self-lint (run before returning text)
 

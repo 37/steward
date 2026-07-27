@@ -1,7 +1,39 @@
 # ste-lint: heuristic anti-slop linter, the machine-checkable subset of ASD-STE100.
 # Origin: woosal1337/blog ep01. Local additions: em/en dash counted as a violation,
-# empty intensifiers banned (user rules, stricter than STE).
+# empty intensifiers banned, user register (steward.json) enforced, distilled
+# dictionary suggestions reported (informational, excluded from total).
 import re, sys, json, glob, os
+
+CONFIG_PATH = os.environ.get("STEWARD_CONFIG", os.path.expanduser("~/.pi/agent/steward.json"))
+DICT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dictionary.json")
+QUALIFIER_STOP = {"the","a","an","this","that","these","those","its","your","our","their","my",
+    "each","every","any","no","some","one","and","or","of","with","for","to","in","on","at","by",
+    "is","are","was","were","be","as","has","have","had","a","per"}
+
+def load_register():
+    try:
+        with open(CONFIG_PATH) as fh: cfg = json.load(fh)
+        return [str(b) for b in cfg.get("banned", [])]
+    except Exception:
+        return []
+
+def load_dict_pairs():
+    try:
+        with open(DICT_PATH) as fh: d = json.load(fh)
+        return [(p["from"], p["to"]) for p in d.get("keep", [])]
+    except Exception:
+        return []
+
+def count_bare(text, term):
+    # Flag `term` when it has no qualifying word directly before it
+    # ("the key" flagged, "API key" passes, "user secret key" passes).
+    n = 0
+    for m in re.finditer(rf"\b{re.escape(term)}s?\b", text, re.I):
+        before = text[:m.start()].rstrip()
+        prev = re.findall(r"[A-Za-z0-9'\-]+$", before)
+        if not prev or prev[0].lower() in QUALIFIER_STOP:
+            n += 1
+    return n
 
 MARKETING = ["seamless","seamlessly","robust","powerful","cutting-edge","effortless","effortlessly",
     "world-class","next-generation","revolutionary","blazing","lightning-fast","elegant","delightful",
@@ -70,15 +102,28 @@ def lint(text):
     v["marketing_adjective"], mh = count_ci(text, MARKETING)
     v["modal_hedge"], _ = count_ci(text, MODAL_HEDGE)
     v["empty_intensifier"], _ = count_ci(text, INTENSIFIER)
+    reg_hits = 0
+    for b in load_register():
+        if b.startswith("bare:"):
+            reg_hits += count_bare(text, b[5:])
+        else:
+            c, _ = count_ci(text, [b])
+            reg_hits += c
+    v["user_register"] = reg_hits
     paras = [p for p in re.split(r"\n\s*\n", raw) if p.strip()]
     v["long_paragraph(>6s)"] = sum(1 for p in paras if len(sentences(strip_code(p))) > 6)
     em = raw.count("—") + raw.count("–")
     v["em_dash"] = em
     total = sum(v.values())
+    dict_sugg = {}
+    for frm, to in load_dict_pairs():
+        c, _ = count_ci(text, [frm])
+        if c: dict_sugg[f"{frm} > {to}"] = c
     per100 = {k: round(x*100.0/words, 2) for k, x in v.items()}
     return {
         "words": words, "sentences": len(sents),
         "violations": v, "total": total,
+        "dict_suggestions(not_in_total)": dict_sugg,
         "total_per100w": round(total*100.0/words, 2),
         "em_dash(slop-marker)": em,
         "longest_sentence_words": (max(longs)[0] if longs else max((wc(s) for s in sents), default=0)),

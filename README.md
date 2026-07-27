@@ -32,23 +32,54 @@ The package has two layers:
 | Command | Effect |
 |---|---|
 | `/steward` | Turn on (to the saved default), or show the current state |
-| `/steward flavored` | General prose discipline (default mode) |
+| `/steward lite` | General prose discipline (default mode) |
 | `/steward strict` | Full rule set: length caps on every sentence, imperative steps |
 | `/steward off` | Turn off for this session |
 | `/steward scope all\|artifacts` | Govern all prose, or written artifacts only |
+| `/steward dict on\|off` | Inject the distilled dictionary tier (top 50 substitution pairs) |
+| `/steward ban <term>` | Ban a term. Prefix `bare:` to flag only unqualified use |
+| `/steward unban <term>` | Remove a banned term |
+| `/steward rule <text>` | Add a free-text writing rule |
+| `/steward unrule <n>` / `/steward rules` | Remove rule by number / list the register |
 | `/steward default <mode>` | Save the startup mode |
-| `/steward status` | Show current mode, scope, and default |
+| `/steward status` | Show mode, scope, dict, and register counts |
 
 You can also type "stop steward" in chat to turn the mode off.
 
 ### Modes
 
-- **flavored**: sentence and paragraph caps, active voice, one name for one
+- **lite**: sentence and paragraph caps, active voice, one name for one
   thing, banned filler words. Vocabulary stays open. Use this for READMEs,
   PR descriptions, issues, and docs.
 - **strict**: every rule, both length caps (20 words per instruction, 25 per
   descriptive sentence), imperative steps. Use this for runbooks, release
   notes, error messages, and safety text.
+
+### User register
+
+Your own rules live in `~/.pi/agent/steward.json` and ride along in the
+injected block. Two shapes:
+
+- **Banned terms** (`/steward ban <term>`): flat bans, checked by the linter.
+  The `bare:` prefix flags a term only when it has no qualifier. The default
+  register ships with `bare:key`: bare "key" is overloaded across API keys,
+  signing keys, cache keys, session keys, and JWT material, and the STE spec
+  itself never uses it unqualified. "Rotate the key" gets flagged; "rotate
+  the signing key" passes.
+- **Free-text rules** (`/steward rule <text>`): edicts a term list cannot
+  express, injected verbatim. Tell the agent "no em-dashes anywhere" and it
+  adds the rule for you.
+
+### Dictionary tier
+
+`/steward dict on` appends 50 substitution pairs (`utilize > use`,
+`verify > make sure`, `should > must`...) distilled from the 1274
+non-approved dictionary entries in the spec. The distillation was ranked
+against 240k words of real agent session prose, then hand-filtered: STE
+pairs that conflict with software terminology (`run > operate`,
+`build > assemble`, `call > tell`, `execute > do`) are excluded and
+documented as overrides in
+[skills/steward/dictionary.json](skills/steward/dictionary.json).
 
 ### Scope
 
@@ -75,8 +106,9 @@ The full digest with rule numbers is in
 
 ## Token cost
 
-The injected block costs approximately 310 tokens (flavored) or 450 tokens
-(strict) per request. The block sits at the end of the system prompt and is
+The injected block costs approximately 310 tokens (lite) or 450 tokens
+(strict) per request, plus about 300 tokens with the dictionary tier on and
+a few tokens per register entry. The block sits at the end of the system prompt and is
 stable within a session, so prompt caching absorbs most of the cost after the
 first request. STE output is also shorter than baseline output, which returns
 some of the cost as output-token savings.
