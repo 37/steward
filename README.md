@@ -12,11 +12,48 @@ violations with this rule set active.
 
 ## Install
 
+### pi
+
 ```bash
 pi install git:github.com/37/steward
 ```
 
 Restart pi or run `/reload`.
+
+### Claude Code
+
+```bash
+git clone https://github.com/37/steward ~/.claude/steward
+bash ~/.claude/steward/claude/install.sh
+```
+
+The installer merges two hooks into `~/.claude/settings.json`
+(`SessionStart` injects the rule block, `UserPromptSubmit` handles commands)
+and links the skill. It is idempotent and honors `CLAUDE_CONFIG_DIR`. Start
+a new session, then type `/steward status`, `/steward strict`, or
+`/steward ban <term>` as a prompt. "stop steward" turns the mode off. The
+active mode lives in a flag file and wins over the config default at the
+next session start; use `/steward off` to return to the default. Validated
+results are in [docs/portability.md](docs/portability.md).
+
+### Codex
+
+Codex has no hook system, so steward lives as a managed block in
+`~/.codex/AGENTS.md`:
+
+```bash
+git clone https://github.com/37/steward ~/.codex/steward
+node ~/.codex/steward/codex/steward-codex.cjs lite    # or strict
+```
+
+The command writes the block between steward markers and leaves the rest of
+your AGENTS.md untouched. Mode changes apply to the next Codex session.
+`node .../steward-codex.cjs off` removes the block;  `refresh` re-renders it
+after you edit the shared config. No in-session commands, no stop phrase:
+these need hooks that Codex does not offer.
+
+All three agents share one config (`~/.config/steward/config.json`), so the
+register and dictionary settings follow you across agents.
 
 ## Use
 
