@@ -1,0 +1,28 @@
+{
+  "_comment": "Merge this hooks object into ~/.claude/settings.json (claude/install.sh does it for you). STEWARD_DIR is replaced by the installer with the repo path.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"STEWARD_DIR/claude/steward-hook.cjs\" SessionStart",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"STEWARD_DIR/claude/steward-hook.cjs\" UserPromptSubmit",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
