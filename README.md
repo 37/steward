@@ -1,6 +1,7 @@
-# ste-writing
+# steward
 
-A [pi](https://github.com/badlogic/pi-mono) package that makes the agent write
+**STE W**ritten **A**rtifact **R**equirements **D**oc: a
+[pi](https://github.com/badlogic/pi-mono) package that makes the agent write
 prose in [ASD-STE100 Simplified Technical English](https://asd-ste100.org).
 
 STE is a controlled language standard from the aerospace industry (1986,
@@ -12,7 +13,7 @@ violations with this rule set active.
 ## Install
 
 ```bash
-pi install git:github.com/37/ste-writing
+pi install git:github.com/37/steward
 ```
 
 Restart pi or run `/reload`.
@@ -21,7 +22,7 @@ Restart pi or run `/reload`.
 
 The package has two layers:
 
-1. **Extension**: the `/ste` command injects a compact STE rule block into the
+1. **Extension**: the `/steward` command injects a compact STE rule block into the
    system prompt each turn. This governs all prose the agent produces.
 2. **Skill**: the full 53-rule digest, a surface-to-mode map, and a heuristic
    linter. The agent loads it on demand for deep rewrites and rule lookups.
@@ -30,15 +31,15 @@ The package has two layers:
 
 | Command | Effect |
 |---|---|
-| `/ste` | Turn on (to the saved default), or show the current state |
-| `/ste flavored` | General prose discipline (default mode) |
-| `/ste strict` | Full rule set: length caps on every sentence, imperative steps |
-| `/ste off` | Turn off for this session |
-| `/ste scope all\|artifacts` | Govern all prose, or written artifacts only |
-| `/ste default <mode>` | Save the startup mode |
-| `/ste status` | Show current mode, scope, and default |
+| `/steward` | Turn on (to the saved default), or show the current state |
+| `/steward flavored` | General prose discipline (default mode) |
+| `/steward strict` | Full rule set: length caps on every sentence, imperative steps |
+| `/steward off` | Turn off for this session |
+| `/steward scope all\|artifacts` | Govern all prose, or written artifacts only |
+| `/steward default <mode>` | Save the startup mode |
+| `/steward status` | Show current mode, scope, and default |
 
-You can also type "stop ste" in chat to turn the mode off.
+You can also type "stop steward" in chat to turn the mode off.
 
 ### Modes
 
@@ -54,7 +55,7 @@ You can also type "stop ste" in chat to turn the mode off.
 - **all** (default): chat replies and written artifacts.
 - **artifacts**: only text written into files, commits, PRs, and issues.
 
-The scope choice persists in `~/.pi/agent/ste.json`. The session mode
+The scope choice persists in `~/.pi/agent/steward.json`. The session mode
 persists in the session file and survives a restart of that session.
 
 ## What the rules do
@@ -70,7 +71,7 @@ persists in the session file and survives a restart of that session.
 - If a pronoun can point at two nouns, repeat the noun.
 
 The full digest with rule numbers is in
-[skills/ste-writing/rules-reference.md](skills/ste-writing/rules-reference.md).
+[skills/steward/rules-reference.md](skills/steward/rules-reference.md).
 
 ## Token cost
 
@@ -83,7 +84,7 @@ some of the cost as output-token savings.
 ## Linter
 
 ```bash
-python3 skills/ste-writing/ste-lint.py your-draft.md
+python3 skills/steward/ste-lint.py your-draft.md
 ```
 
 The score is violations per 100 words. Lower is cleaner. Lint a draft, apply

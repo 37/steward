@@ -2,7 +2,7 @@
 // Runs the real extension against a fake pi API. Node >= 23 (native TS type stripping).
 import assert from "node:assert";
 
-const m = await import("../extension/ste-writing.ts");
+const m = await import("../extension/steward.ts");
 const ext = m.default;
 assert.equal(typeof ext, "function", "default export is a function");
 

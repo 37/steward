@@ -1,5 +1,6 @@
-// ste-writing extension: /ste command toggles ASD-STE100 prose discipline.
-// Command pattern from ponytail's pi-extension. Depth layer: ../skills/ste-writing/
+// steward (STE Written Artifact Requirements Doc): /steward toggles ASD-STE100
+// prose discipline. Command pattern from ponytail's pi-extension.
+// Depth layer: ../skills/steward/
 import { readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
@@ -10,10 +11,10 @@ type Scope = "all" | "artifacts";
 
 const MODES: Mode[] = ["flavored", "strict", "off"];
 const SCOPES: Scope[] = ["all", "artifacts"];
-const CONFIG_PATH = join(homedir(), ".pi", "agent", "ste.json");
-// Works in both layouts: <repo>/extension/../skills/ste-writing (package install)
-// and ~/.pi/agent/extensions/../skills/ste-writing (manual copy).
-const SKILL_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "skills", "ste-writing");
+const CONFIG_PATH = join(homedir(), ".pi", "agent", "steward.json");
+// Works in both layouts: <repo>/extension/../skills/steward (package install)
+// and ~/.pi/agent/extensions/../skills/steward (manual copy).
+const SKILL_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "skills", "steward");
 
 function readConfig(): { defaultMode: Mode; scope: Scope } {
   try {
@@ -65,10 +66,10 @@ Core rules:
 STE governs clarity, not volume. Do not pad; compression rules (caveman) still apply.${strictExtra}
 
 Depth on demand: ${SKILL_DIR}/ (rules-reference.md = full 53-rule digest, ste-lint.py = mechanical check).
-Deactivate: "stop ste" or /ste off.`;
+Deactivate: "stop steward" or /steward off.`;
 }
 
-export default function steExtension(pi: any) {
+export default function stewardExtension(pi: any) {
   const cfg = readConfig();
   let mode: Mode = cfg.defaultMode;
   let scope: Scope = cfg.scope;
@@ -86,33 +87,33 @@ export default function steExtension(pi: any) {
       return;
     }
     if (mode === "off") {
-      c.ui.setStatus("ste", "");
+      c.ui.setStatus("steward", "");
       return;
     }
     const scopeTag = scope === "artifacts" ? " (artifacts)" : "";
     c.ui.setStatus(
-      "ste",
-      theme.fg("muted", "✈ ste: ") + theme.fg("text", mode.toUpperCase() + scopeTag),
+      "steward",
+      theme.fg("muted", "✈ steward: ") + theme.fg("text", mode.toUpperCase() + scopeTag),
     );
   }
 
   function setMode(next: Mode, ctx?: any) {
     mode = next;
-    pi.appendEntry("ste-mode", { mode, scope });
+    pi.appendEntry("steward-mode", { mode, scope });
     syncStatus(ctx);
-    ctx?.ui?.notify?.(`STE mode: ${mode}${mode === "off" ? "" : `, scope: ${scope}`}`, "info");
+    ctx?.ui?.notify?.(`steward mode: ${mode}${mode === "off" ? "" : `, scope: ${scope}`}`, "info");
   }
 
   function setScope(next: Scope, ctx?: any) {
     scope = next;
-    pi.appendEntry("ste-mode", { mode, scope });
+    pi.appendEntry("steward-mode", { mode, scope });
     writeConfig({ defaultMode: readConfig().defaultMode, scope: next });
     syncStatus(ctx);
-    ctx?.ui?.notify?.(`STE scope: ${scope} (saved as default)`, "info");
+    ctx?.ui?.notify?.(`steward scope: ${scope} (saved as default)`, "info");
   }
 
-  pi.registerCommand("ste", {
-    description: "STE writing mode. Modes: flavored|strict|off. Commands: status, scope all|artifacts, default <mode>",
+  pi.registerCommand("steward", {
+    description: "STE writing mode (steward). Modes: flavored|strict|off. Commands: status, scope all|artifacts, default <mode>",
     handler: async (args: string, ctx: any) => {
       const [primary, secondary] = String(args || "").trim().toLowerCase().split(/\s+/);
 
@@ -121,37 +122,37 @@ export default function steExtension(pi: any) {
           const d = readConfig().defaultMode;
           setMode(d === "off" ? "flavored" : d, ctx);
         } else {
-          ctx?.ui?.notify?.(`STE: ${mode}, scope: ${scope}`, "info");
+          ctx?.ui?.notify?.(`steward: ${mode}, scope: ${scope}`, "info");
         }
         return;
       }
       if (primary === "status") {
-        ctx?.ui?.notify?.(`STE: current ${mode}, scope ${scope}, default ${readConfig().defaultMode}`, "info");
+        ctx?.ui?.notify?.(`steward: current ${mode}, scope ${scope}, default ${readConfig().defaultMode}`, "info");
         return;
       }
       if (primary === "scope") {
         if (SCOPES.includes(secondary as Scope)) setScope(secondary as Scope, ctx);
-        else ctx?.ui?.notify?.("Usage: /ste scope all|artifacts", "warning");
+        else ctx?.ui?.notify?.("Usage: /steward scope all|artifacts", "warning");
         return;
       }
       if (primary === "default") {
         if (MODES.includes(secondary as Mode)) {
           writeConfig({ defaultMode: secondary as Mode, scope });
-          ctx?.ui?.notify?.(`STE default mode saved: ${secondary}`, "info");
-        } else ctx?.ui?.notify?.("Usage: /ste default flavored|strict|off", "warning");
+          ctx?.ui?.notify?.(`steward default mode saved: ${secondary}`, "info");
+        } else ctx?.ui?.notify?.("Usage: /steward default flavored|strict|off", "warning");
         return;
       }
       if (MODES.includes(primary as Mode)) {
         setMode(primary as Mode, ctx);
         return;
       }
-      ctx?.ui?.notify?.("Unknown /ste argument. Modes: flavored|strict|off. Commands: status, scope, default.", "warning");
+      ctx?.ui?.notify?.("Unknown /steward argument. Modes: flavored|strict|off. Commands: status, scope, default.", "warning");
     },
   });
 
   pi.on("input", async (event: any) => {
     if (event?.source === "extension") return;
-    if (mode !== "off" && /\bstop ste\b/i.test(String(event?.text || ""))) setMode("off");
+    if (mode !== "off" && /\bstop (ste|steward)\b/i.test(String(event?.text || ""))) setMode("off");
   });
 
   pi.on("session_start", async (_event: any, ctx: any) => {
@@ -161,7 +162,8 @@ export default function steExtension(pi: any) {
     scope = fresh.scope;
     for (let i = entries.length - 1; i >= 0; i -= 1) {
       const e = entries[i];
-      if (e?.type === "custom" && e?.customType === "ste-mode") {
+      // Accept legacy "ste-mode" entries from sessions before the rename.
+      if (e?.type === "custom" && (e?.customType === "steward-mode" || e?.customType === "ste-mode")) {
         if (MODES.includes(e?.data?.mode)) mode = e.data.mode;
         if (SCOPES.includes(e?.data?.scope)) scope = e.data.scope;
         break;

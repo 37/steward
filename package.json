@@ -1,24 +1,24 @@
 {
-  "name": "ste-writing",
-  "version": "1.0.0",
-  "description": "ASD-STE100 Simplified Technical English mode for the pi coding agent. /ste toggles a controlled writing style that removes ambiguity from prose.",
-  "keywords": ["pi-package", "pi", "ste", "asd-ste100", "simplified-technical-english", "writing", "ai-slop"],
+  "name": "steward",
+  "version": "1.1.0",
+  "description": "steward (STE Written Artifact Requirements Doc): ASD-STE100 Simplified Technical English mode for the pi coding agent. /steward toggles a controlled writing style that removes ambiguity from prose.",
+  "keywords": ["pi-package", "pi", "steward", "ste", "asd-ste100", "simplified-technical-english", "writing", "ai-slop"],
   "license": "MIT",
   "author": {
     "name": "37",
     "url": "https://github.com/37"
   },
-  "homepage": "https://github.com/37/ste-writing",
+  "homepage": "https://github.com/37/steward",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/37/ste-writing.git"
+    "url": "git+https://github.com/37/steward.git"
   },
   "type": "module",
   "scripts": {
     "test": "node tests/smoke.mjs"
   },
   "pi": {
-    "extensions": ["./extension/ste-writing.ts"],
+    "extensions": ["./extension/steward.ts"],
     "skills": ["./skills"]
   }
 }

@@ -1,9 +1,9 @@
 ---
-name: ste-writing
-description: Write or rewrite prose in ASD-STE100 Simplified Technical English (Issue 9). Applies to documentation, READMEs, PR descriptions, commit message bodies, Linear issues/comments/status updates, rpiv artifacts, handoffs, release notes, and error messages: never code, identifiers, or command syntax. Use when asked to write or edit any of these surfaces, to make writing clear or plain, to remove AI slop, or when the user invokes "ste", "STE", or "simplified technical english". Two modes: strict (procedures, runbooks, safety text, error messages) and flavored (general prose).
+name: steward
+description: Write or rewrite prose in ASD-STE100 Simplified Technical English (Issue 9). Applies to documentation, READMEs, PR descriptions, commit message bodies, Linear issues/comments/status updates, rpiv artifacts, handoffs, release notes, and error messages: never code, identifiers, or command syntax. Use when asked to write or edit any of these surfaces, to make writing clear or plain, to remove AI slop, or when the user invokes "steward", "ste", "STE", or "simplified technical english". Two modes: strict (procedures, runbooks, safety text, error messages) and flavored (general prose).
 ---
 
-# ste-writing
+# steward
 
 Write prose in ASD-STE100 Simplified Technical English. STE is a controlled
 natural language: 53 writing rules plus a controlled dictionary. It removes
@@ -14,7 +14,7 @@ in this directory's provenance note below).
 Full rule digest with rule numbers: [rules-reference.md](rules-reference.md).
 Load it when a judgment call needs the exact rule or an example.
 
-Ambient layer: the `/ste` extension (`extension/ste-writing.ts` in this
+Ambient layer: the `/steward` extension (`extension/steward.ts` in this
 package) injects the core rules per session (modes: flavored, strict, off;
 scope: all or artifacts). This skill is the depth layer under it.
 
