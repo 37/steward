@@ -1,5 +1,5 @@
-// steward (STE Written Artifact Requirements Doc): /steward toggles ASD-STE100
-// prose discipline. Pi adapter over core/steward-core.cjs; command pattern from
+// steward: /steward toggles ASD-STE100 prose discipline.
+// Pi adapter over core/steward-core.cjs; command pattern from
 // ponytail's pi-extension. Depth layer: ../skills/steward/
 import { createRequire } from "node:module";
 

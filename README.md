@@ -8,8 +8,7 @@ The rules are not new. They come from [ASD-STE100 Simplified Technical
 English](https://asd-ste100.org), a writing standard built in 1986 so that
 aircraft mechanics anywhere in the world could not misread a maintenance
 manual. Each word gets one meaning. Each sentence gets one job. steward
-applies that standard to AI output. The name stands for **STE W**ritten
-**A**rtifact **R**equirements **D**oc.
+applies that standard to AI output and stands guard over your prose.
 
 ## What it does, in one example
 
