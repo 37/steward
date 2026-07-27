@@ -1,16 +1,54 @@
 # steward
 
-**STE W**ritten **A**rtifact **R**equirements **D**oc: a
-[pi](https://github.com/badlogic/pi-mono) package that makes the agent write
-prose in [ASD-STE100 Simplified Technical English](https://asd-ste100.org).
+steward makes your AI coding assistant write clear, short prose instead of
+bloated "AI slop". Turn it on, and every README, error message, pull-request
+description, and issue comment comes out plain, direct, and unambiguous.
 
-STE is a controlled language standard from the aerospace industry (1986,
-current: Issue 9, 2025). It gives each word one meaning and each sentence one
-job. Applied to an AI agent, it removes the padding, ambiguity, and filler
-that read as "AI slop". A cross-model benchmark measured 50-74% fewer slop
-violations with this rule set active.
+The rules are not new. They come from [ASD-STE100 Simplified Technical
+English](https://asd-ste100.org), a writing standard built in 1986 so that
+aircraft mechanics anywhere in the world could not misread a maintenance
+manual. Each word gets one meaning. Each sentence gets one job. steward
+applies that standard to AI output. The name stands for **STE W**ritten
+**A**rtifact **R**equirements **D**oc.
+
+## What it does, in one example
+
+The same request ("write the error message for a failed deploy"), same AI,
+with steward off and on:
+
+**Off** (127 words, em-dashes, two instructions per step):
+
+> 2. Verify you are deploying the intended version/tag — a stale local
+>    cache can serve an old artifact. Clear the cache and pull again.
+> ...
+> The deploy was aborted; nothing was changed.
+
+**On, strict mode** (79 words, one instruction per step):
+
+> 1. Run the build again to make a clean artifact.
+> 2. Compare the new checksum with the registry checksum.
+> 3. If the registry entry is old, publish the artifact again.
+> 4. If the problem continues, contact the registry administrator.
+
+Full outputs and scores for three tasks are in
+[docs/examples.md](docs/examples.md). Across measured runs, steward took
+this AI's writing from 6 to 9 style faults per 100 words down to 0 to 1,
+with 12 to 38 percent fewer words. The same gradient held inside Claude
+Code ([docs/portability.md](docs/portability.md)).
+
+## Is it worth using?
+
+Use steward if you use an AI assistant to write things people read: docs,
+READMEs, PR descriptions, issues, release notes, error messages, runbooks.
+
+The cost is small. The rule sheet adds about 300 to 500 tokens to each
+request, most of it absorbed by prompt caching, and the shorter output
+returns part of that. The honest limit: steward fixes the form of writing,
+not the substance. It cannot make an empty paragraph true.
 
 ## Install
+
+steward runs inside your AI coding assistant. Pick yours.
 
 ### pi
 
@@ -18,7 +56,7 @@ violations with this rule set active.
 pi install git:github.com/37/steward
 ```
 
-Restart pi or run `/reload`.
+Restart pi or run `/reload`. Done: steward starts in lite mode.
 
 ### Claude Code
 
@@ -27,158 +65,108 @@ git clone https://github.com/37/steward ~/.claude/steward
 bash ~/.claude/steward/claude/install.sh
 ```
 
-The installer merges two hooks into `~/.claude/settings.json`
-(`SessionStart` injects the rule block, `UserPromptSubmit` handles commands)
-and links the skill. It is idempotent and honors `CLAUDE_CONFIG_DIR`. Start
-a new session, then type `/steward status`, `/steward strict`, or
-`/steward ban <term>` as a prompt. "stop steward" turns the mode off. The
-active mode lives in a flag file and wins over the config default at the
-next session start; use `/steward off` to return to the default. Validated
-results are in [docs/portability.md](docs/portability.md).
+Start a new session and type `/steward status` to check. The installer only
+adds two hooks to your Claude settings and links the skill; it is safe to
+re-run. Details and validation results:
+[docs/portability.md](docs/portability.md).
 
 ### Codex
-
-Codex has no hook system, so steward lives as a managed block in
-`~/.codex/AGENTS.md`:
 
 ```bash
 git clone https://github.com/37/steward ~/.codex/steward
 node ~/.codex/steward/codex/steward-codex.cjs lite    # or strict
 ```
 
-The command writes the block between steward markers and leaves the rest of
-your AGENTS.md untouched. Mode changes apply to the next Codex session.
-`node .../steward-codex.cjs off` removes the block;  `refresh` re-renders it
-after you edit the shared config. No in-session commands, no stop phrase:
-these need hooks that Codex does not offer.
+Codex has no live commands, so this writes the rules into
+`~/.codex/AGENTS.md` (your other content stays untouched). Changes apply to
+the next session. Run the same command with `off` to remove, `refresh` to
+update.
 
-All three agents share one config (`~/.config/steward/config.json`), so the
-register and dictionary settings follow you across agents.
+All three agents share one config file
+(`~/.config/steward/config.json`), so your settings follow you across
+agents.
 
-## Use
+## Daily use
 
-The package has two layers:
+Three commands cover most days:
 
-1. **Extension**: the `/steward` command injects a compact STE rule block into the
-   system prompt each turn. This governs all prose the agent produces.
-2. **Skill**: the full 53-rule digest, a surface-to-mode map, and a heuristic
-   linter. The agent loads it on demand for deep rewrites and rule lookups.
+```
+/steward strict     step-by-step material: runbooks, release notes, errors
+/steward lite       everyday prose: docs, PRs, issues (the default)
+/steward off        back to the assistant's normal voice
+```
 
-### Commands
+You can also type "stop steward" in chat. The full command set:
 
 | Command | Effect |
 |---|---|
 | `/steward` | Turn on (to the saved default), or show the current state |
-| `/steward lite` | General prose discipline (default mode) |
-| `/steward strict` | Full rule set: length caps on every sentence, imperative steps |
-| `/steward off` | Turn off for this session |
-| `/steward scope all\|artifacts` | Govern all prose, or written artifacts only |
-| `/steward dict on\|off` | Inject the distilled dictionary tier (top 50 substitution pairs) |
-| `/steward ban <term>` | Ban a term. Prefix `bare:` to flag only unqualified use |
+| `/steward scope all\|artifacts` | Govern all prose, or only text written into files, commits, and PRs |
+| `/steward dict on\|off` | Also enforce 50 word substitutions (`utilize` > `use`) |
+| `/steward ban <term>` | Ban a term. Prefix `bare:` to allow qualified use |
 | `/steward unban <term>` | Remove a banned term |
-| `/steward rule <text>` | Add a free-text writing rule |
-| `/steward unrule <n>` / `/steward rules` | Remove rule by number / list the register |
-| `/steward default <mode>` | Save the startup mode |
-| `/steward status` | Show mode, scope, dict, and register counts |
+| `/steward rule <text>` | Add your own writing rule in plain words |
+| `/steward unrule <n>` / `/steward rules` | Remove a rule by number / list everything |
+| `/steward default <mode>` | Choose the startup mode |
+| `/steward status` | Show mode, scope, dictionary, and rule counts |
 
-You can also type "stop steward" in chat to turn the mode off.
+## Make it yours
 
-### Modes
+Your own rules ride along with the built-in ones and live in
+`~/.config/steward/config.json`:
 
-- **lite**: sentence and paragraph caps, active voice, one name for one
-  thing, banned filler words. Vocabulary stays open. Use this for READMEs,
-  PR descriptions, issues, and docs.
-- **strict**: every rule, both length caps (20 words per instruction, 25 per
-  descriptive sentence), imperative steps. Use this for runbooks, release
-  notes, error messages, and safety text.
+- **Ban a term**: `/steward ban synergy`. The `bare:` prefix bans a word
+  only when it stands alone. The default register ships with `bare:key`,
+  because bare "key" is ambiguous in software (API key? signing key? cache
+  key?). "Rotate the key" gets flagged; "rotate the signing key" passes.
+- **Add a rule in plain words**: `/steward rule No exclamation marks in
+  headings.` The text goes to the AI verbatim. You can also just tell the
+  assistant "no em-dashes ever" and it will add the rule for you.
+- **Turn on the dictionary**: `/steward dict on` adds 50 substitution pairs
+  distilled from the standard's 1274 discouraged words, filtered against
+  240k words of real coding-session prose so that software terms survive:
+  the standard would replace "run the tests" with "operate the tests";
+  steward knows better. The exclusions are documented in
+  [skills/steward/dictionary.json](skills/steward/dictionary.json).
 
-### User register
-
-Your own rules live in `~/.pi/agent/steward.json` and ride along in the
-injected block. Two shapes:
-
-- **Banned terms** (`/steward ban <term>`): flat bans, checked by the linter.
-  The `bare:` prefix flags a term only when it has no qualifier. The default
-  register ships with `bare:key`: bare "key" is overloaded across API keys,
-  signing keys, cache keys, session keys, and JWT material, and the STE spec
-  itself never uses it unqualified. "Rotate the key" gets flagged; "rotate
-  the signing key" passes.
-- **Free-text rules** (`/steward rule <text>`): edicts a term list cannot
-  express, injected verbatim. Tell the agent "no em-dashes anywhere" and it
-  adds the rule for you.
-
-### Dictionary tier
-
-`/steward dict on` appends 50 substitution pairs (`utilize > use`,
-`verify > make sure`, `should > must`...) distilled from the 1274
-non-approved dictionary entries in the spec. The distillation was ranked
-against 240k words of real agent session prose, then hand-filtered: STE
-pairs that conflict with software terminology (`run > operate`,
-`build > assemble`, `call > tell`, `execute > do`) are excluded and
-documented as overrides in
-[skills/steward/dictionary.json](skills/steward/dictionary.json).
-
-### Scope
-
-- **all** (default): chat replies and written artifacts.
-- **artifacts**: only text written into files, commits, PRs, and issues.
-
-The scope choice persists in `~/.pi/agent/steward.json`. The session mode
-persists in the session file and survives a restart of that session.
-
-## What the rules do
+## The rules, in short
 
 - One name for one thing. One meaning per word.
-- Active voice. Simple tenses. A verb for an action, not a nominalization
-  ("analyze the log", not "perform an analysis of the log").
-- Maximum 20 words per instruction, 25 per descriptive sentence.
+- Active voice. A verb for an action: "analyze the log", not "perform an
+  analysis of the log".
+- Instructions: maximum 20 words each, one instruction per sentence.
+  Descriptions: maximum 25 words per sentence.
 - One topic per paragraph, maximum 6 sentences.
 - Condition first, then command: "If the test fails, read the log."
-- No semicolons, no em-dashes, no contractions, no Latin abbreviations, no
-  marketing adjectives, no empty intensifiers.
+- No semicolons, em-dashes, contractions, Latin abbreviations, marketing
+  adjectives, or empty intensifiers.
 - If a pronoun can point at two nouns, repeat the noun.
 
-The full digest with rule numbers is in
+The full 53-rule digest:
 [skills/steward/rules-reference.md](skills/steward/rules-reference.md).
 
-## Measured examples
+## How it works
 
-[docs/examples.md](docs/examples.md) shows three prompts run off/lite/strict
-with the actual outputs side by side. Headline: README intro 6.61 → 0.00
-violations per 100 words, deploy error 9.45 → 0.00 with 38% fewer words.
-
-## Token cost
-
-The injected block costs approximately 310 tokens (lite) or 450 tokens
-(strict) per request, plus about 300 tokens with the dictionary tier on and
-a few tokens per register entry. The block sits at the end of the system prompt and is
-stable within a session, so prompt caching absorbs most of the cost after the
-first request. STE output is also shorter than baseline output, which returns
-some of the cost as output-token savings.
-
-## Linter
+A small extension adds the active mode's rule sheet to the AI's instructions
+on every request. A bundled skill carries the depth: the full rule digest,
+the dictionary, and a checker script you can run on any draft:
 
 ```bash
 python3 skills/steward/ste-lint.py your-draft.md
 ```
 
-The score is violations per 100 words. Lower is cleaner. Lint a draft, apply
-the rules, lint again: the delta is the signal. The linter checks the
-mechanical subset of STE. It is not a certified STE checker.
-
-## Limits
-
-These rules fix the form of bad prose, not the substance. They cannot make a
-hollow paragraph true. Code, identifiers, CLI syntax, and quoted text are
-never rewritten.
+The score is style faults per 100 words; lower is cleaner. Check a draft,
+apply the rules, check again: the drop is the signal. It covers the
+mechanical part of the standard and is not a certified STE checker.
 
 ## Credits
 
 - [ASD-STE100](https://asd-ste100.org): the standard, free from ASD. This
-  package distills the rules and does not reproduce the specification or its
-  dictionary.
+  package distills the rules and does not reproduce the specification or
+  its dictionary.
 - [woosal1337/blog ep01](https://github.com/woosal1337/blog/tree/master/videos/ep01-the-cure-for-ai-slop):
-  the original skill distillation, the linter, and the cross-model benchmark.
+  the original skill distillation, the linter, and the cross-model
+  benchmark that measured 50 to 74 percent fewer style faults.
 - [ponytail](https://github.com/DietrichGebert/ponytail): the extension
   pattern for mode toggles.
 
