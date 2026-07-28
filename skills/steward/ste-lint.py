@@ -54,16 +54,31 @@ INTENSIFIER = ["genuine","genuinely","truly","really","very","extremely","incred
 BE = r"(?:am|is|are|was|were|be|been|being)"
 PP_IRREG = r"(?:done|made|sent|read|built|kept|held|set|put|run|written|shown|given|taken|found|got|gotten|seen|known|thrown|drawn)"
 
-def strip_code(t):
+def strip_exempt(t):
+    # The rules never apply to code, identifiers, CLI syntax, or quoted text.
+    # Blank the exempt spans before scoring, so a verbatim quote does not score
+    # as slop: quoting an error string that contains an em-dash or a contraction
+    # is correct behavior, and counting it punished the correct answer.
+    # Line structure is kept so the paragraph check still sees the same shape.
     t = re.sub(r"```.*?```", " ", t, flags=re.S)
     t = re.sub(r"`[^`]*`", " ", t)
+    t = re.sub(r"^(\s*)>.*$", r"\1 ", t, flags=re.M)      # markdown blockquote
+    t = re.sub(r'"[^"\n]*"', " ", t)                     # straight double quotes
+    t = re.sub(r"\u201c[^\u201d\n]*\u201d", " ", t)      # curly double quotes
     return t
+
+def is_table_row(line):
+    return line.lstrip().startswith("|")
 
 def sentences(text):
     out = []
     for line in text.split("\n"):
         s = line.strip()
         if not s: continue
+        # A markdown table row is structured data, not a sentence. Scoring it as
+        # one counts cell text as an over-long sentence and cell separators as
+        # prose punctuation. Word-level checks still see the cell content.
+        if is_table_row(s): continue
         s = re.sub(r"^\s*#{1,6}\s*", "", s)
         s = re.sub(r"^\s*(?:[-*+]|\d+[.)])\s+", "", s)
         if not s: continue
@@ -85,14 +100,17 @@ def count_ci(text, phrases):
     return n, hits
 
 def lint(text):
-    raw = text
-    text = strip_code(text)
+    # One exempt-stripped body for every check. Before this, em-dash and
+    # paragraph checks read the unstripped text, so exempt spans still scored.
+    raw = strip_exempt(text)
+    text = raw
     sents = sentences(text)
     words = sum(wc(s) for s in sents) or 1
     v = {}
     longs = [(wc(s), s) for s in sents if wc(s) > 20]
     v["long_sentence(>20w)"] = len(longs)
-    v["semicolon"] = text.count(";")
+    # Semicolons inside table cells separate cell items, not clauses.
+    v["semicolon"] = "\n".join(l for l in text.split("\n") if not is_table_row(l)).count(";")
     v["contraction"] = len(re.findall(r"\b\w+['’](?:t|re|ve|ll|d|s|m)\b", text))
     v["passive_voice"] = len(re.findall(rf"\b{BE}\s+(?:\w+ed|{PP_IRREG})\b", text, re.I))
     v["ing_main_verb"] = len(re.findall(rf"\b{BE}\s+\w+ing\b", text, re.I))
@@ -115,7 +133,7 @@ def lint(text):
     # sentences. Drop them before the paragraph-length check.
     def para_sentences(p):
         prose = "\n".join(l for l in p.split("\n") if not re.match(r"^\s*(?:[-*+]|\d+[.)])\s", l))
-        return sentences(strip_code(prose))
+        return sentences(strip_exempt(prose))
     v["long_paragraph(>6s)"] = sum(1 for p in paras if len(para_sentences(p)) > 6)
     em = raw.count("—") + raw.count("–")
     v["em_dash"] = em
@@ -136,7 +154,25 @@ def lint(text):
         "sample_banned": list(dict.fromkeys(bh))[:6],
     }
 
+def selftest():
+    # Exempt spans must not score; identical text outside a quote must score.
+    v = lambda t: {k: n for k, n in lint(t)["violations"].items() if n}
+    assert v("The deploy failed \u2014 we can't reach it.").get("em_dash") == 1, "plain em-dash must count"
+    assert "em_dash" not in v("> The deploy failed \u2014 we can't reach it.\n\nThe fix is ready."), "blockquote must be exempt"
+    assert "em_dash" not in v('He said "deploy failed \u2014 retry" today.'), "quoted span must be exempt"
+    assert "contraction" not in v("> we can't reach the registry\n"), "quoted contraction must be exempt"
+    assert v("we can't reach the registry").get("contraction") == 1, "plain contraction must count"
+    assert "em_dash" not in v("```\nx = 1  # a \u2014 dash\n```\n"), "code fence must be exempt"
+    row = "| Auth0 | managed SaaS; enterprise SSO | good for teams that want it |\n"
+    assert "semicolon" not in v(row), "table cell separator must not count"
+    assert "long_sentence(>20w)" not in v(row * 3), "table row must not be a sentence"
+    assert v("We chose it; it was ready.").get("semicolon") == 1, "prose semicolon must count"
+    assert v("| a | utilize the cache |\n\nText here.").get("banned_word") == 1, "cell words still count"
+    print("ste-lint selftest: passed")
+
 if __name__ == "__main__":
+    if "--selftest" in sys.argv:
+        selftest(); sys.exit(0)
     files = sys.argv[1:] or []
     if not files:
         print(json.dumps(lint(sys.stdin.read()), indent=2)); sys.exit(0)
