@@ -84,18 +84,33 @@ Or type "stop steward" in chat. Also available: `/steward status`,
 `scope all|artifacts`, `dict on|off`, and `default <mode>`.
 
 ## Examples
-> "write an instructional error message for a failed deploy"
 
-| **steward off** (127 words total) | **steward strict** (79 words total) |
+The same deploy error, rewritten by steward. The content is held fixed, so form
+is the only thing that changes. Two separate drafts cannot show this, because
+two drafts carry different content, and the shorter draft then looks better for
+the wrong reason.
+
+| **before** (65 words, 4.62 faults/100w) | **after `/steward strict`** (66 words, 3.03) |
 |---|---|
-| 1. Rebuild and republish the artifact, then retry the deploy.<br>2. Verify you are deploying the intended version/tag — a stale local cache can serve an old artifact. Clear the cache and pull again.<br>3. If the registry entry is outdated, update it with the new checksum and retry.<br>4. If none of the above applies, the artifact may have been tampered with. Do not deploy it — contact your registry administrator. | 1. Run the build again to make a clean artifact.<br>2. Compare the new checksum with the registry checksum.<br>3. If the registry entry is old, publish the artifact again.<br>4. If the problem continues, contact the registry administrator. |
+| Nothing was deployed, and no changes were made to the servers.<br><br>Remedies:<br>1. Rebuild the artifact.<br>2. Clear the local artifact cache and pull it again.<br>3. Republish the registry entry if it is stale.<br><br>If the mismatch persists after a clean rebuild, treat the artifact as potentially tampered with. Do not deploy it; contact the registry administrator. | Nothing was deployed. No changes were made to the servers.<br><br>Remedies:<br>1. Rebuild the artifact.<br>2. Clear the local artifact cache.<br>3. Pull the artifact again.<br>4. Republish the registry entry if the entry is stale.<br><br>If the mismatch persists after a clean rebuild, treat the artifact as potentially tampered with. Do not deploy it. Contact the registry administrator. |
 
-More examples with scores: [docs/examples.md](docs/examples.md).
+One instruction per step, so remedy 2 becomes two steps. No semicolons, so the
+last line becomes two sentences. Every fact survives, including the tamper
+warning. The word count does not fall.
+
+That last point is the honest one. steward improves the form. It does not make
+writing shorter by itself. Across 11 measured scenarios the word count moved
+between -36% and +16%, and it rose in 4 of them. Where output does get shorter,
+the model wrote less, and did not write tighter.
+
+All scores, all 11 scenarios, and the raw outputs:
+[docs/examples.md](docs/examples.md).
 
 Use steward if your assistant writes things people read: docs, READMEs, PR
-descriptions, issues, release notes, error messages. The cost is a few
-hundred prompt tokens per request, mostly absorbed by caching. The honest
-limit: steward fixes the form of writing, not the substance.
+descriptions, issues, release notes, error messages. The cost is about 490
+(lite) to 570 (strict) prompt tokens per request, mostly absorbed by caching.
+The limit, now measured: steward fixes the form of writing, not the substance.
+In 33 measured cells it never dropped a supplied fact, and it never added one.
 
 ## Credits
 
