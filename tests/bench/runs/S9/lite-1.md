@@ -1,0 +1,2 @@
+- The dictionary grew from 50 to 300 pairs.
+- The linter now reports the new pairs as suggestions.

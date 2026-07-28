@@ -1,0 +1,159 @@
+{
+  "_meta": {
+    "protocol_p1": "generation: each scenario x {off,lite,strict} x 3 runs, pi -p --no-session, scratch agent dir (no extensions), steward block injected via --append-system-prompt from core instructions().",
+    "protocol_p2": "rewrite: S2 off run-1 output rewritten under strict block; substance parity must be 100%, word delta then measures form alone.",
+    "checklist": "each fact is a case-insensitive regex; coverage = matched facts / total facts. Facts are supplied in the prompt, so coverage measures retention, not invention.",
+    "s11_note": "S11 has no supplied facts by design (world-knowledge scenario). Its checklist is structural: provider coverage, use-case count, recommendations. Factual accuracy of provider claims is not auto-verified."
+  },
+  "scenarios": [
+    {
+      "id": "S1",
+      "title": "Tracker issue filing",
+      "prompt": "File a tracker issue for this finding. Facts: the /export endpoint returns HTTP 200 with an empty body when the date filter excludes all rows. Downstream ETL jobs treat an empty body as data corruption and retry the export for six hours. On-call was paged twice this week because of the retry storms. Write the issue title and body.",
+      "checklist": {
+        "endpoint": "/export|export endpoint",
+        "status_200": "HTTP 200|status 200|200 with",
+        "empty_body": "empty (body|response)",
+        "filter_condition": "date filter.{0,40}(excludes|matches|no rows|all rows|zero rows)",
+        "retry_6h": "(six|6) ?hours",
+        "oncall_paged": "on-?call|paged"
+      }
+    },
+    {
+      "id": "S2",
+      "title": "Deploy error message",
+      "prompt": "Write the error message a user sees when a deploy fails because the built artifact checksum does not match the registry checksum. Facts to include: expected checksum sha256:aaa111 (from the registry); actual checksum sha256:bbb222 (from the built artifact); the deploy was aborted and nothing changed on the servers; remedies: rebuild the artifact, clear the local artifact cache and pull again, republish the registry entry if it is stale; policy: if the mismatch continues after a clean rebuild, treat the artifact as possibly tampered with, do not deploy it, and contact the registry administrator.",
+      "checklist": {
+        "expected_checksum": "aaa111",
+        "actual_checksum": "bbb222",
+        "abort_assurance": "abort|nothing (was )?changed|no changes were made",
+        "rebuild_step": "rebuild|build (the artifact )?again|run the build again",
+        "cache_step": "cache",
+        "registry_step": "republish|publish (it |the (artifact|entry) )?again|update the registry",
+        "tamper_warning": "tamper",
+        "do_not_deploy": "do not deploy|don't deploy|stop the deploy",
+        "admin_contact": "administrator|admin"
+      }
+    },
+    {
+      "id": "S3",
+      "title": "Pull-request description",
+      "prompt": "Write the pull-request description for this change. Facts: the steward dictionary grew from 50 to 300 substitution pairs; the first 50 pairs are unchanged and keep their order, so the injected prompt tier is stable; pairs 51-300 are used only by the linter as informational suggestions; 19 pairs carry software-engineering context notes (for example, generate stays for code generation and render stays for UI); the smoke test passes.",
+      "checklist": {
+        "growth": "50 (to|->|\u2192) ?300|300 (substitution )?pairs",
+        "tier_stable": "first 50.{0,60}(unchanged|same|stable|order)|prompt tier.{0,30}(stable|unchanged)",
+        "lint_only": "lint(er)?[ -]only|informational|51",
+        "context_notes": "19.{0,40}notes?|context notes",
+        "tests_pass": "smoke|tests? pass"
+      }
+    },
+    {
+      "id": "S4",
+      "title": "Long-form upstream-PR notes",
+      "prompt": "Write the notes for an upstream pull request. Facts: bug - the CLI crashes when the config file contains a BOM; root cause - the JSON parser receives the BOM bytes because the loader reads the file as raw bytes; fix - strip the BOM in the loader before parsing; rejected alternative 1 - patch the JSON parser, rejected because the parser is vendored and updates would erase the patch; rejected alternative 2 - document the limitation, rejected because Windows editors add the BOM by default; compatibility - no public API change.",
+      "checklist": {
+        "bug_bom_crash": "BOM.{0,60}crash|crash.{0,60}BOM",
+        "root_cause": "raw bytes|parser receives|loader reads",
+        "fix_strip": "strip.{0,30}BOM|remove.{0,30}BOM",
+        "alt1_vendored": "vendored|erase the patch",
+        "alt2_windows": "Windows.{0,40}(editors?|default)|editors?.{0,40}BOM",
+        "compat": "no (public )?API change|does not change the (public )?API|compatib"
+      }
+    },
+    {
+      "id": "S5",
+      "title": "Runbook procedure",
+      "prompt": "Write the runbook for restarting the payments service. Facts, in this required order: 1 drain the load balancer and wait for zero active connections; 2 stop the worker process first, then the api process; 3 start the api process first, then the worker process; 4 verify that the /health endpoint returns 200 and that the queue depth returns to zero within five minutes. Rollback: if /health does not return 200 within five minutes, restore the previous release and re-add the node to the load balancer.",
+      "checklist": {
+        "drain": "drain",
+        "zero_connections": "(zero|0|no) (active )?connections|connections.{0,30}(reach |are |is )?(zero|0)",
+        "stop_order": "stop.{0,80}worker.{0,80}api",
+        "start_order": "start.{0,80}api.{0,80}worker",
+        "health_200": "/?health.{0,40}200",
+        "queue_zero": "queue depth.{0,40}(zero|0)",
+        "five_minutes": "(five|5) ?minutes",
+        "rollback": "roll ?back|restore the previous|previous release",
+        "readd_node": "re-?add.{0,40}(node|load balancer)"
+      },
+      "order_check": ["drain", "stop_order", "start_order", "health_200"]
+    },
+    {
+      "id": "S6",
+      "title": "Release notes",
+      "prompt": "Write the user-facing release notes for steward version 1.3.0 from these commits: 'dict: expand keep pairs 50 -> 300'; 'docs: writing-system design notes from Breaking signals post' (internal design notes); 'chore: track package-lock.json'; 'claude hook: accept namespaced and @/$ command forms'; 'README: rules and customization first, examples after Use'; 'docs: side-by-side off/strict tables in README'. Only user-facing changes belong in release notes.",
+      "checklist": {
+        "dict_expansion": "dictionary|300",
+        "claude_hook": "claude.{0,60}(hook|command forms|namespaced)|command forms",
+        "readme_docs": "README|documentation|docs"
+      },
+      "negative_checklist": {
+        "no_lockfile": "package-lock",
+        "no_internal_notes": "writing-system|Breaking signals"
+      }
+    },
+    {
+      "id": "S7",
+      "title": "Stakeholder update",
+      "prompt": "Write a short project update for a non-technical sponsor. Facts: the reporting milestone is complete; one risk - the payment-provider integration is delayed by an upstream dependency, and the delay is two weeks; a decision is needed from the sponsor by Friday: cut the export feature from this release, or move the release date by two weeks. Ask the sponsor for the decision.",
+      "checklist": {
+        "milestone_done": "reporting.{0,40}(complete|done|finished)|milestone.{0,40}(complete|done)",
+        "delay_2w": "(two|2) ?weeks?",
+        "deadline_friday": "Friday",
+        "option_cut": "(cut|drop|remove).{0,40}export",
+        "option_slip": "(move|delay|push|slip).{0,40}(release|date)",
+        "the_ask": "decision|decide|choose|let (us|me) know which"
+      }
+    },
+    {
+      "id": "S8",
+      "title": "Code-heavy control",
+      "prompt": "Write a Python function that returns the SHA-256 hex digest of a file, reading the file in 64 KB chunks. Add a one-paragraph usage note.",
+      "checklist": {
+        "usage_note": "[A-Za-z].{40,}"
+      },
+      "code_control": {
+        "must_compile": true,
+        "must_contain": "sha256|hashlib"
+      }
+    },
+    {
+      "id": "S9",
+      "title": "Terse-prompt control",
+      "prompt": "Summarise the following changes as short and simple as possible. Changes: the dictionary grew from 50 to 300 pairs, and the linter now reports the new pairs as informational suggestions.",
+      "checklist": {
+        "growth": "50 (to|->|\u2192) ?300|300",
+        "lint_suggestions": "lint|suggestions"
+      },
+      "expectation": "all conditions score ~0.00 faults/100w (existing null result)"
+    },
+    {
+      "id": "S10",
+      "title": "Quoting control",
+      "prompt": "File a bug report. The command 'deploy push' prints this exact error, and you must quote it verbatim in the report: Error 731 \u2014 we can't reach the registry, and the manifest wasn't uploaded. Facts: the error happens only when the VPN is on; the workaround is to retry with the VPN off.",
+      "checklist": {
+        "vpn_condition": "VPN.{0,30}(is )?(on|enabled)|only when.{0,20}VPN|enable the VPN",
+        "workaround": "workaround|retry.{0,40}VPN off|VPN off"
+      },
+      "quote_control": {
+        "verbatim": "Error 731 \u2014 we can't reach the registry, and the manifest wasn't uploaded"
+      }
+    },
+    {
+      "id": "S11",
+      "title": "Auth-provider comparison (world-knowledge)",
+      "prompt": "Produce a summary comparison of the following auth identity providers: Auth0, ZITADEL, Clerk, WorkOS, Ory, Keycloak. Recommend the best provider based on three different common use-cases.",
+      "checklist": {
+        "auth0": "Auth0",
+        "zitadel": "ZITADEL",
+        "clerk": "Clerk",
+        "workos": "WorkOS",
+        "ory": "Ory",
+        "keycloak": "Keycloak"
+      },
+      "structural": {
+        "min_use_cases": 3,
+        "recommendation_pattern": "recommend|best (choice|fit|provider|option)|choose|pick"
+      }
+    }
+  ]
+}

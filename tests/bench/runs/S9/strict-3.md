@@ -1,0 +1,2 @@
+- Expanded the dictionary from 50 to 300 pairs.
+- Added informational suggestions for the new pairs.

@@ -1,0 +1,2 @@
+- Dictionary expanded from 50 to 300 pairs.
+- Linter reports new pairs as informational suggestions.
