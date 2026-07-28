@@ -84,9 +84,7 @@ Or type "stop steward" in chat. Also available: `/steward status`,
 `scope all|artifacts`, `dict on|off`, and `default <mode>`.
 
 ## Examples
-
-The same request ("write the error message for a failed deploy"), same AI.
-The "what you can do" steps, side by side:
+> "write an instructional error message for a failed deploy"
 
 | **steward off** (127 words total) | **steward strict** (79 words total) |
 |---|---|
