@@ -1,6 +1,6 @@
 ---
 name: steward
-description: Write or rewrite prose in ASD-STE100 Simplified Technical English (Issue 9). Applies to documentation, READMEs, PR descriptions, commit message bodies, Linear issues/comments/status updates, rpiv artifacts, handoffs, release notes, and error messages: never code, identifiers, or command syntax. Use when asked to write or edit any of these surfaces, to make writing clear or plain, to remove AI slop, or when the user invokes "steward", "ste", "STE", or "simplified technical english". Two modes: strict (procedures, runbooks, safety text, error messages) and lite (general prose).
+description: 'Write or rewrite prose in ASD-STE100 Simplified Technical English (Issue 9). Applies to documentation, READMEs, PR descriptions, commit message bodies, Linear issues/comments/status updates, rpiv artifacts, handoffs, release notes, and error messages: never code, identifiers, or command syntax. Use when asked to write or edit any of these surfaces, to make writing clear or plain, to remove AI slop, or when the user invokes "steward", "ste", "STE", or "simplified technical english". Two modes: strict (procedures, runbooks, safety text, error messages) and lite (general prose).'
 ---
 
 # steward
