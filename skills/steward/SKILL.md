@@ -77,6 +77,24 @@ PUNCTUATION
 
 Write only the requested text. No preamble, no summary, no closing remarks.
 
+## Reporting (all modes)
+
+Summaries, findings reports, status updates, issue descriptions, and recaps
+get one extra layer on top of the active mode. The reader is a less-technical
+person who must understand the issues and key assertions without help.
+
+- Lead with the problem and its cost in concrete terms (time lost, runs
+  blocked) before the method.
+- Use short labeled sections in this order: the problem, what it cost, what
+  was tried, what was found, what is still open, the ask.
+- Replace jargon and internal names with what the thing does. If a name must
+  stay, explain it in the same sentence.
+- Mark each claim as proven, inferred, or untested.
+- Give a recommendation with every list of options. Never send an unranked
+  list.
+- End with the decision or action you need from the reader. Deep technical
+  detail comes after the plain-language sections, or on request.
+
 ## Modes
 
 - **strict**: procedures, runbooks, error messages, safety text, anything a
@@ -107,6 +125,7 @@ Surface → mode map for this user's workflows:
 | Linear issues, comments, status updates | lite | Condition→action for repro steps (strict) |
 | rpiv artifacts, handoffs | lite | Headings carry structure; keep 6.1 gradual-information |
 | READMEs, docs | lite | First paragraph: what it is, what it does, in ≤3 sentences |
+| Work summaries, findings reports, recaps | active mode + reporting rules | Less-technical reader; see Reporting section |
 
 ## Self-lint (run before returning text)
 

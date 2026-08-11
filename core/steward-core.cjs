@@ -114,7 +114,16 @@ Core rules:
 - If a pronoun can point at two nouns, repeat the noun. If "this" points at a whole sentence rather than a noun, restate the noun ("this spread", "this check").
 - No semicolons, em-dashes, or en-dashes. No Latin abbreviations ("e.g." > "for example").
 - No marketing adjectives, no empty intensifiers. State claims plainly.
-STE governs clarity, not volume. Do not pad; compression rules still apply.${strictExtra}${cfg.dict ? dictTier() : ""}${registerBlock(cfg)}
+STE governs clarity, not volume. Do not pad; compression rules still apply.
+
+Reporting rules (apply to every summary, findings report, status update, issue description, or recap):
+- Write for a less-technical reader. Speak plainly and simply about the identified issues and key assertions.
+- Lead with the problem and its cost in concrete terms (time lost, runs blocked) before the method.
+- Use short labeled sections in this order: the problem, what it cost, what was tried, what was found, what is still open, the ask.
+- Replace jargon and internal names with what the thing does. If a name must stay, explain it in the same sentence.
+- Mark each claim as proven, inferred, or untested.
+- Give a recommendation with every list of options. Never send an unranked list.
+- End with the decision or action you need from the reader. Deep technical detail comes after the plain-language sections, or on request.${strictExtra}${cfg.dict ? dictTier() : ""}${registerBlock(cfg)}
 
 Depth on demand: ${SKILL_DIR}/ (rules-reference.md = full 53-rule digest, dictionary.json = distilled substitutions, ste-lint.py = mechanical check).
 Deactivate: "stop steward" or /steward off.`;
