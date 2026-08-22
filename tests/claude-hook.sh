@@ -21,8 +21,15 @@ run_prompt "/steward:steward lite" | grep -q "STEWARD MODE CHANGED"
 [ "$(cat "$CLAUDE_CONFIG_DIR/.steward-active")" = "lite" ]
 echo "PASS namespaced /steward:steward"
 
-run_prompt "@steward status" | grep -q "steward: current lite"
+run_prompt "/steward profile voice" | grep -q "VOICE PROFILE ACTIVE"
+grep -q '"profile": "voice"' "$STEWARD_CONFIG"
+echo "PASS voice profile"
+
+run_prompt "@steward status" | grep -q "profile voice"
 echo "PASS @-prefix status"
+
+run_prompt "/steward profile plain" | grep -q "steward profile: plain"
+echo "PASS plain profile"
 
 run_prompt "/steward ban synergy" >/dev/null
 grep -q synergy "$STEWARD_CONFIG"

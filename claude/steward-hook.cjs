@@ -87,13 +87,19 @@ function onPrompt(promptRaw) {
   if (sub === "status") {
     const cfg = core.readConfig();
     emit(
-      `steward: current ${readFlag() || "off"}, scope ${cfg.scope}, dict ${cfg.dict ? "on" : "off"}, default ${cfg.defaultMode}, banned ${cfg.banned.length}, rules ${cfg.rules.length}`,
+      `steward: current ${readFlag() || "off"}, scope ${cfg.scope}, profile ${cfg.profile}, dict ${cfg.dict ? "on" : "off"}, default ${cfg.defaultMode}, banned ${cfg.banned.length}, rules ${cfg.rules.length}`,
     );
     return;
   }
   if (sub === "scope" && core.SCOPES.includes(rest)) {
     core.writeConfig({ scope: rest });
     emit(`steward scope: ${rest}`);
+    return;
+  }
+  if (sub === "profile" && core.PROFILES.includes(rest)) {
+    core.writeConfig({ profile: rest });
+    const mode = readFlag() || core.readConfig().defaultMode;
+    emit(mode === "off" ? `steward profile saved: ${rest}` : `steward profile: ${rest}\n\n${block(mode)}`);
     return;
   }
   if (sub === "dict" && (rest === "on" || rest === "off")) {

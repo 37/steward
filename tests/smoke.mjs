@@ -87,6 +87,7 @@ function boot() {
 {
   const cfg = JSON.parse(readFileSync(process.env.STEWARD_CONFIG, "utf8"));
   assert.ok(["lite", "strict", "off"].includes(cfg.defaultMode), "mode schema");
+  assert.ok(["plain", "voice"].includes(cfg.profile), "profile schema");
   assert.ok(Array.isArray(cfg.banned) && Array.isArray(cfg.rules), "register schema");
 }
 

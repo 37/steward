@@ -5,15 +5,17 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const core = require("../core/steward-core.cjs");
-const { MODES, SCOPES, normalizeMode, readConfig, writeConfig, instructions } = core;
+const { MODES, SCOPES, PROFILES, normalizeMode, readConfig, writeConfig, instructions } = core;
 
 type Mode = "lite" | "strict" | "off";
 type Scope = "all" | "artifacts";
+type Profile = "plain" | "voice";
 
 export default function stewardExtension(pi: any) {
   const boot = readConfig();
   let mode: Mode = boot.defaultMode;
   let scope: Scope = boot.scope;
+  let profile: Profile = boot.profile;
   let lastCtx: any = null;
 
   function syncStatus(ctx?: any) {
@@ -32,7 +34,7 @@ export default function stewardExtension(pi: any) {
       return;
     }
     const cfg = readConfig();
-    const tags = [cfg.scope === "artifacts" ? "artifacts" : "", cfg.dict ? "dict" : ""]
+    const tags = [cfg.scope === "artifacts" ? "artifacts" : "", profile === "voice" ? "voice" : "", cfg.dict ? "dict" : ""]
       .filter(Boolean)
       .join(",");
     c.ui.setStatus(
@@ -48,6 +50,13 @@ export default function stewardExtension(pi: any) {
     ctx?.ui?.notify?.(`steward mode: ${mode}${mode === "off" ? "" : `, scope: ${scope}`}`, "info");
   }
 
+  function setProfile(next: Profile, ctx?: any) {
+    profile = next;
+    writeConfig({ profile });
+    syncStatus(ctx);
+    ctx?.ui?.notify?.(`steward profile: ${profile}`, "info");
+  }
+
   function completions(prefix: string): Array<{ value: string; label: string }> | null {
     const parts = prefix.split(/\s+/);
     const cfg = readConfig();
@@ -59,6 +68,7 @@ export default function stewardExtension(pi: any) {
         ["off", "deactivate for this session"],
         ["status", "mode, scope, dict, register counts"],
         ["scope", "all | artifacts"],
+        ["profile", "plain | voice"],
         ["dict", "dictionary tier on | off"],
         ["ban", "ban a term (bare: prefix = unqualified only)"],
         ["unban", "remove a banned term"],
@@ -72,6 +82,7 @@ export default function stewardExtension(pi: any) {
       const sub = parts[0].toLowerCase();
       const second = (words: string[]) => words.map((v) => ({ value: `${sub} ${v}`, label: v }));
       if (sub === "scope") cands = second(SCOPES);
+      else if (sub === "profile") cands = second(PROFILES);
       else if (sub === "dict") cands = second(["on", "off"]);
       else if (sub === "default") cands = second(MODES);
       else if (sub === "unban") cands = second(cfg.banned);
@@ -84,7 +95,7 @@ export default function stewardExtension(pi: any) {
 
   pi.registerCommand("steward", {
     description:
-      "STE writing mode. Modes: lite|strict|off. Commands: status, scope, dict, ban, unban, rule, unrule, rules, default",
+      "STE writing mode. Modes: lite|strict|off. Commands: status, scope, profile, dict, ban, unban, rule, unrule, rules, default",
     getArgumentCompletions: (prefix: string) => completions(prefix),
     handler: async (args: string, ctx: any) => {
       const input = String(args || "").trim();
@@ -104,7 +115,7 @@ export default function stewardExtension(pi: any) {
       if (p === "status") {
         const cfg = readConfig();
         ctx?.ui?.notify?.(
-          `steward: current ${mode}, scope ${cfg.scope}, dict ${cfg.dict ? "on" : "off"}, default ${cfg.defaultMode}, banned ${cfg.banned.length}, rules ${cfg.rules.length}`,
+          `steward: current ${mode}, scope ${cfg.scope}, profile ${profile}, dict ${cfg.dict ? "on" : "off"}, default ${cfg.defaultMode}, banned ${cfg.banned.length}, rules ${cfg.rules.length}`,
           "info",
         );
         return;
@@ -118,6 +129,12 @@ export default function stewardExtension(pi: any) {
           syncStatus(ctx);
           ctx?.ui?.notify?.(`steward scope: ${scope} (saved as default)`, "info");
         } else ctx?.ui?.notify?.("Usage: /steward scope all|artifacts", "warning");
+        return;
+      }
+      if (p === "profile") {
+        const next = rest.toLowerCase();
+        if (PROFILES.includes(next)) setProfile(next as Profile, ctx);
+        else ctx?.ui?.notify?.("Usage: /steward profile plain|voice", "warning");
         return;
       }
       if (p === "dict") {
@@ -179,7 +196,7 @@ export default function stewardExtension(pi: any) {
         return;
       }
       ctx?.ui?.notify?.(
-        "Unknown /steward argument. Modes: lite|strict|off. Commands: status, scope, dict, ban, unban, rule, unrule, rules, default.",
+        "Unknown /steward argument. Modes: lite|strict|off. Commands: status, scope, profile, dict, ban, unban, rule, unrule, rules, default.",
         "warning",
       );
     },
@@ -195,6 +212,7 @@ export default function stewardExtension(pi: any) {
     const fresh = readConfig();
     mode = fresh.defaultMode;
     scope = fresh.scope;
+    profile = fresh.profile;
     for (let i = entries.length - 1; i >= 0; i -= 1) {
       const e = entries[i];
       // Accept legacy "ste-mode" entries from sessions before the rename.
@@ -212,6 +230,7 @@ export default function stewardExtension(pi: any) {
     if (mode === "off") return;
     const cfg = readConfig();
     cfg.scope = scope; // session scope wins over config
+    cfg.profile = profile;
     const base = event?.systemPrompt ? `${event.systemPrompt}\n\n` : "";
     return { systemPrompt: `${base}${instructions(mode, cfg)}` };
   });

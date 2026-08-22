@@ -20,13 +20,14 @@ scope: all or artifacts). This skill is the depth layer under it.
 
 ## Scope
 
-Applies to: text the reader keeps. Docs, READMEs, PR descriptions, commit
-message bodies, Linear issues/comments/status updates, rpiv artifacts
-(research/design/plan/review/handoff), release notes, error messages, code
-comments.
+When scope is `all`, Steward applies to chat and to text the reader keeps.
+When scope is `artifacts`, Steward applies only to saved prose: docs, READMEs,
+PR descriptions, commit bodies, issues, status updates, rpiv artifacts, release
+notes, error messages, and code comments.
 
-Does not apply to: code, identifiers, CLI syntax, quoted text, chat replies
-(caveman mode governs those), marketing copy, or anything that needs a voice.
+Steward never applies to code, identifiers, CLI syntax, quoted text, or text the
+user asks the agent to preserve. The plain profile excludes marketing copy and
+prose that needs a personal voice.
 
 ## Core rules (the working set)
 
@@ -77,25 +78,24 @@ PUNCTUATION
 
 Write only the requested text. No preamble, no summary, no closing remarks.
 
-## Reporting (all modes)
+## Durable-report substance
 
-Summaries, findings reports, status updates, issue descriptions, and recaps
-get one extra layer on top of the active mode. The reader is a less-technical
-person who must understand the issues and key assertions without help.
+PR descriptions, issues, handoffs, findings, recaps, and stakeholder updates
+must reduce the reader's verification work. This layer does not apply to
+ordinary chat or agent instructions.
 
-- Lead with the problem and its cost in concrete terms (time lost, runs
-  blocked) before the method.
-- Use short labeled sections in this order: the problem, what it cost, what
-  was tried, what was found, what is still open, the ask.
-- Replace jargon and internal names with what the thing does. If a name must
-  stay, explain it in the same sentence.
-- Mark each claim as proven, inferred, or untested.
-- Give a recommendation with every list of options. Never send an unranked
-  list.
-- End with the decision or action you need from the reader. Deep technical
-  detail comes after the plain-language sections, or on request.
+Start with the decision or requested action. Verify each material claim, or
+mark the claim as inferred or untested. Let the reader's decision set the
+length. Rank options, recommend one, and state unknowns and checks not done.
+Move an unverified claim to the open section or cut it.
 
-## Modes
+`writing-lint.py --report` checks the visible contract. The linter checks the
+ask, option ranking, claim labels, unknowns, and a supplied reading budget. The
+linter cannot verify truth without the source evidence.
+
+## Modes and profiles
+
+Modes control form:
 
 - **strict**: procedures, runbooks, error messages, safety text, anything a
   reader executes under stress: every rule, both length caps, imperative
@@ -105,10 +105,22 @@ person who must understand the issues and key assertions without help.
   thing, banned-word discipline. Vocabulary stays open; do not force the
   875-word dictionary onto general prose.
 
-User register: `~/.pi/agent/steward.json` carries `banned` (terms; `bare:`
-prefix = flag only unqualified use) and `rules` (free-text edicts). When a
-user asks for a writing rule ("no em-dashes"), add it with `/steward rule`
-or `/steward ban` instead of editing this skill.
+Profiles control expression:
+
+- **plain** (default): precise technical prose.
+- **voice**: selected human-facing prose that needs a personal voice. It removes
+  puffery, filler, vague attribution, chatbot praise, and generic conclusions.
+  It preserves facts and exact technical nouns. It excludes procedures, error
+  messages, agent instructions, and precise technical references.
+
+Use `/steward profile plain|voice`. The voice profile never adds facts,
+opinions, or emotion that the author did not supply.
+
+User register: `~/.config/steward/config.json` carries `banned` terms and
+free-text `rules`. The `STEWARD_CONFIG` environment variable can select a
+different file. The `bare:` prefix flags only unqualified use. When a user asks
+for a writing rule, add it with `/steward rule` or `/steward ban` instead of
+editing this skill.
 
 Dictionary: [dictionary.json](dictionary.json) holds the distilled STE
 substitution pairs (keep) and the SE-conflict overrides (words STE restricts
@@ -138,9 +150,14 @@ Surface → mode map for this user's workflows:
 7. Pronoun that can point at two nouns? Repeat the noun.
 8. Marketing adjective or empty intensifier? Delete it.
 
-Mechanical check: `python3 ste-lint.py draft.md` (in this skill directory).
-Score is violations per 100 words; lower is cleaner. Use the before/after
-delta as the signal, not the absolute number.
+Mechanical form check: `python3 ste-lint.py draft.md`.
+
+Durable report check:
+`python3 writing-lint.py --report --max-words 400 draft.md`.
+
+Optional voice check: `python3 writing-lint.py --voice draft.md`.
+
+Use the before and after delta as the signal, not the absolute number.
 
 ## Limits
 
@@ -150,4 +167,7 @@ technical noun choice, "makes good sense" tests); do not claim certified STE.
 
 Provenance: distilled from ASD-STE100 Issue 9 (asd-ste100.org, free spec) and
 the woosal1337/blog ep01 experiment (skill + linter + cross-model benchmark).
-Do not paste the spec into output; it is copyrighted.
+The optional voice profile adapts selected ideas from pstack `unslop`, copyright
+2026 Lauren Tan, under the MIT License. Steward excludes its always-on rule,
+forced opinions, deliberate mess, and blanket technical-noun bans.
+Do not paste the ASD specification into output; it is copyrighted.

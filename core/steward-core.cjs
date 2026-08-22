@@ -6,6 +6,7 @@ const path = require("node:path");
 
 const MODES = ["lite", "strict", "off"];
 const SCOPES = ["all", "artifacts"];
+const PROFILES = ["plain", "voice"];
 const DEFAULT_BANNED = ["bare:key"];
 const SKILL_DIR = path.join(__dirname, "..", "skills", "steward");
 const LEGACY_CONFIG = path.join(os.homedir(), ".pi", "agent", "steward.json");
@@ -36,6 +37,7 @@ function readConfig() {
   return {
     defaultMode: normalizeMode(raw.defaultMode) || "lite",
     scope: SCOPES.includes(raw.scope) ? raw.scope : "all",
+    profile: PROFILES.includes(raw.profile) ? raw.profile : "plain",
     dict: raw.dict === true,
     banned: Array.isArray(raw.banned) ? raw.banned.map(String) : [...DEFAULT_BANNED],
     rules: Array.isArray(raw.rules) ? raw.rules.map(String) : [],
@@ -83,6 +85,37 @@ function registerBlock(cfg) {
   return lines.length ? `\nUser register:\n${lines.join("\n")}` : "";
 }
 
+function substanceBlock() {
+  return `
+
+Durable-report substance rules:
+Apply these rules only to saved reports for human readers: PR descriptions, issues, handoffs, findings, recaps, and stakeholder updates. Do not apply them to ordinary chat or agent instructions.
+- The writer pays the verification cost. Verify each material claim, or label it inferred or untested.
+- Put the decision or requested action before the detail. Then state the problem and its concrete cost.
+- The reader's decision sets the reading budget. Available source material does not set the length.
+- Rank options and recommend one. Do not give the reader an unranked list to audit.
+- State confidence, unknowns, and checks not done. Move an unverified claim to the open section or cut it.
+- Use short labeled sections as needed: decision, problem, cost, evidence, finding, what is still open, ask.
+- End with the action or decision that the reader must take.
+Truth is not a style judgment. A linter cannot verify a claim without source evidence.`;
+}
+
+function voiceBlock(cfg) {
+  if (cfg.profile !== "voice") return "";
+  return `
+
+VOICE PROFILE ACTIVE
+Apply this profile only to selected human-facing prose that needs a personal voice. Exclude procedures, error messages, agent instructions, and precise technical references.
+- Preserve every supplied fact, technical noun, uncertainty, and quoted statement.
+- State a specific fact, reaction, or action. Delete puffery, filler, vague attribution, and generic conclusions.
+- Name the source. If the source is unknown, state that the claim is unverified.
+- Use first person only when the author supplied that position. Do not invent opinions or emotion.
+- Use a natural sentence rhythm without weakening consistent technical constructions.
+- Remove chatbot praise, sycophancy, forced groups of three, and promotional claims without evidence.
+- Keep precise technical nouns such as surface, harness, and primitive when they carry the exact domain meaning.
+The voice profile changes expression, never facts or proof status.`;
+}
+
 function instructions(mode, cfg) {
   const scopeLine =
     cfg.scope === "all"
@@ -97,10 +130,12 @@ Strict additions:
 - Prefer STE dictionary vocabulary; when unsure, check ${SKILL_DIR}/rules-reference.md.`
       : "";
   return `STE MODE ACTIVE (level: ${mode})
+WRITING PROFILE: ${cfg.profile || "plain"}
 
 Write prose in ASD-STE100 Simplified Technical English.
 ${scopeLine}
 Never applies to: code, identifiers, CLI syntax, quoted text, text the user asks you to preserve.
+The plain profile excludes marketing copy and prose that needs a personal voice.
 
 Core rules:
 - One name for one thing. One meaning per word.
@@ -114,24 +149,16 @@ Core rules:
 - If a pronoun can point at two nouns, repeat the noun. If "this" points at a whole sentence rather than a noun, restate the noun ("this spread", "this check").
 - No semicolons, em-dashes, or en-dashes. No Latin abbreviations ("e.g." > "for example").
 - No marketing adjectives, no empty intensifiers. State claims plainly.
-STE governs clarity, not volume. Do not pad; compression rules still apply.
+STE governs clarity, not volume. Do not pad; compression rules still apply.${substanceBlock()}${voiceBlock(cfg)}${strictExtra}${cfg.dict ? dictTier() : ""}${registerBlock(cfg)}
 
-Reporting rules (apply to every summary, findings report, status update, issue description, or recap):
-- Write for a less-technical reader. Speak plainly and simply about the identified issues and key assertions.
-- Lead with the problem and its cost in concrete terms (time lost, runs blocked) before the method.
-- Use short labeled sections in this order: the problem, what it cost, what was tried, what was found, what is still open, the ask.
-- Replace jargon and internal names with what the thing does. If a name must stay, explain it in the same sentence.
-- Mark each claim as proven, inferred, or untested.
-- Give a recommendation with every list of options. Never send an unranked list.
-- End with the decision or action you need from the reader. Deep technical detail comes after the plain-language sections, or on request.${strictExtra}${cfg.dict ? dictTier() : ""}${registerBlock(cfg)}
-
-Depth on demand: ${SKILL_DIR}/ (rules-reference.md = full 53-rule digest, dictionary.json = distilled substitutions, ste-lint.py = mechanical check).
+Depth on demand: ${SKILL_DIR}/ (rules-reference.md = full 53-rule digest, dictionary.json = distilled substitutions, ste-lint.py = form check, writing-lint.py = report and optional voice checks).
 Deactivate: "stop steward" or /steward off.`;
 }
 
 module.exports = {
   MODES,
   SCOPES,
+  PROFILES,
   DEFAULT_BANNED,
   SKILL_DIR,
   configPath,
@@ -139,6 +166,8 @@ module.exports = {
   readConfig,
   writeConfig,
   instructions,
+  substanceBlock,
+  voiceBlock,
   dictTier,
   registerBlock,
 };

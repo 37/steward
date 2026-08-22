@@ -10,7 +10,7 @@ pi, Claude Code, Codex, Copilot, and Qoder.
 | pi API | Purpose | Portable? |
 |---|---|---|
 | `before_agent_start` → systemPrompt append | Inject the rule block every turn | Equivalent exists in Claude Code (hooks); static in Codex |
-| `pi.registerCommand` + argument completions | `/steward` command surface | Claude Code: prompt-text parsing in a hook. Codex: CLI. No completions |
+| `pi.registerCommand` + argument completions | `/steward` modes, scope, profile, dictionary, and register | Claude Code: prompt-text parsing in a hook. Codex: CLI. No completions |
 | `pi.appendEntry` | Per-session mode persistence | Claude Code: flag file. Codex: none (config only) |
 | `ctx.ui.setStatus` | Status-bar indicator | Claude Code: statusline script. Codex: none |
 | `pi.on("input")` | "stop steward" phrase | Claude Code: UserPromptSubmit hook. Codex: none |
@@ -61,8 +61,8 @@ skills/steward/         shared skill, dictionary, linter (all agents)
 
 Config moves to an agent-neutral path: `~/.config/steward/config.json`
 (`STEWARD_CONFIG` env overrides; the legacy `~/.pi/agent/steward.json` is
-read once and migrated). One config means one behavior: `/steward strict`
-in pi also governs the next Claude Code session.
+read once and migrated). The config stores the form mode and the `plain` or
+`voice` profile. One config means one behavior across adapters.
 
 The pi adapter keeps every pi feature (completions, status bar, session
 entries, live toggle). Other adapters degrade only in the surfaces the host
@@ -70,6 +70,9 @@ lacks, never in the rules themselves: the injected block is byte-identical
 because every adapter calls the same `instructions()` function.
 
 ## Validation (real Claude Code sessions)
+
+These measurements predate the durable-report and optional voice layers. They
+measure the STE form layer only.
 
 Run on Claude Code v2.1.207, isolated `CLAUDE_CONFIG_DIR`, same README
 prompt as [examples.md](examples.md), scored with `ste-lint.py`:

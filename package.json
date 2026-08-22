@@ -24,7 +24,7 @@
   },
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.mjs && bash tests/claude-hook.sh"
+    "test": "node tests/smoke.mjs && node tests/writing-system.mjs && bash tests/claude-hook.sh"
   },
   "pi": {
     "extensions": [

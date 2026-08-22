@@ -4,6 +4,7 @@
 //
 //   node codex/steward-codex.cjs lite|strict   set mode and write the block
 //   node codex/steward-codex.cjs off           remove the block
+//   node codex/steward-codex.cjs profile plain|voice
 //   node codex/steward-codex.cjs refresh       re-render after config edits
 //
 // Changes apply to the NEXT Codex session (AGENTS.md is read at start).
@@ -37,13 +38,22 @@ const arg = (process.argv[2] || "").toLowerCase();
 if (arg === "off") {
   core.writeConfig({ defaultMode: "off" });
   apply("off");
+} else if (arg === "profile") {
+  const profile = (process.argv[3] || "").toLowerCase();
+  if (!core.PROFILES.includes(profile)) {
+    console.error("Usage: steward-codex.cjs profile plain|voice");
+    process.exit(1);
+  }
+  core.writeConfig({ profile });
+  const mode = core.readConfig().defaultMode;
+  apply(mode === "off" ? "off" : mode);
 } else if (arg === "refresh") {
   const mode = core.readConfig().defaultMode;
   apply(mode === "off" ? "off" : mode);
 } else {
   const mode = core.normalizeMode(arg);
   if (!mode || mode === "off") {
-    console.error("Usage: steward-codex.cjs lite|strict|off|refresh");
+    console.error("Usage: steward-codex.cjs lite|strict|off|profile plain|voice|refresh");
     process.exit(1);
   }
   core.writeConfig({ defaultMode: mode });

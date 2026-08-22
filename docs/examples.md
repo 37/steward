@@ -81,11 +81,27 @@ three conditions scored 0.00 in all runs. If your prompt already demands terse
 writing, steward has little to add. Its value concentrates where prose has room
 to sprawl: descriptions, docs, filings, notes.
 
+## Deterministic writing-system checks
+
+The model benchmark above measures the STE form layer only. The new writing
+system adds deterministic checks without making a model-quality claim.
+
+```bash
+python3 skills/steward/writing-lint.py --report --max-words 400 update.md
+python3 skills/steward/writing-lint.py --voice essay.md
+```
+
+The report check flags a missing front-loaded decision, an unranked option list,
+missing claim labels, missing unknowns, and a supplied reading-budget breach.
+The voice check flags selected puffery, vague attribution, chatbot phrases, and
+generic conclusions. Neither check verifies truth. Source evidence must do that.
+
 ## Cost
 
-The injected block measures about 488 tokens in lite and 570 in strict, with
-the dictionary tier off. With `dict on` it measures about 786 and 869. Most of
-this is absorbed by prompt caching.
+Before the report and voice layers, the measured injected block used about 488
+tokens in lite and 570 in strict, with the dictionary tier off. With `dict on`,
+it used about 786 and 869. These figures are historical. Re-measure prompt cost
+before the next release.
 
 ## What changed from the earlier version of this page
 

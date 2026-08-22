@@ -1,7 +1,8 @@
 # Writing-system notes: from form rules to substance rules
 
 Source: "Breaking signals, breaking systems" (guille.site/posts/breaking-signals/, 2026-03-19).
-Status: design notes for the steward "writing system" extension. Not shipped.
+Status: implemented in the shared core, the optional voice profile, and
+`skills/steward/writing-lint.py`.
 
 ## The argument in the post
 
@@ -40,13 +41,19 @@ rules (STE).
 - **R7 — Polish is not a signal.** Do not add style to hide thin substance.
   The metric is useful content per token, not tone.
 
-## Extension points for steward
+## Implemented shape
 
-Steward README states the current limit: "steward fixes the form of writing,
-not the substance." The post supplies the missing half. Form rules cap the
-reading cost. Substance rules cap the verification cost.
+The STE form layer caps ambiguity and sentence cost. The durable-report layer
+reduces the reader's verification work. The optional voice profile removes
+selected AI patterns without changing facts or technical nouns.
 
-### 1. Output-specific profiles
+The shared core owns the injected rules. Pi, Claude Code, and Codex render the
+same block. The `plain` profile is the default. The `voice` profile is optional.
+
+`writing-lint.py --report` checks the visible report contract. Add `--voice` for
+the optional voice checks. Truth remains a source-backed human or fixture gate.
+
+### 1. Output-specific profiles (deferred)
 
 One profile per artifact type: stakeholder update, PR description, incident
 note, release notes, email, error message. Each profile sets:
@@ -56,7 +63,7 @@ note, release notes, email, error message. Each profile sets:
 - list policy: ranked and recommended only (R3)
 - a "confidence and unknowns" section (R4)
 
-### 2. User Q&A clarifying flow
+### 2. User Q&A clarifying flow (deferred)
 
 Before the agent drafts third-party output, steward instructs it to ask the
 user:
@@ -69,7 +76,7 @@ user:
 This restores the "think before you write" step that LLM output skips. The
 Q&A is the proof-of-work substitute.
 
-### 3. Lint additions (beyond ste-lint.py)
+### 3. Lint additions (shipped)
 
 - unranked-list detector: list with 3+ items and no recommendation
 - missing-ask detector: no explicit action or decision in the first paragraph
@@ -77,7 +84,7 @@ Q&A is the proof-of-work substitute.
   open questions
 - budget check: length against the profile's reading budget
 
-### 4. Anti-slop rule
+### 4. Anti-slop rule (shipped as the optional voice profile)
 
 Never forward raw model output to a third party. The flow prompts the user:
 "Which of these claims did you verify?" Unverified claims move to the
