@@ -37,7 +37,8 @@ rules (STE).
   to end the exchange in one message: answer the reader's likely questions in
   the draft.
 - **R6 — Legible to the recipient.** Define terms for the audience. No insider
-  jargon. (STE covers part of this: one name for one thing.)
+  jargon. (STE covers part of this: one name for one thing.) Implemented as
+  the self-contained hand-off rule and the `undefined_reference` lint check.
 - **R7 — Polish is not a signal.** Do not add style to hide thin substance.
   The metric is useful content per token, not tone.
 

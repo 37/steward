@@ -149,6 +149,7 @@ Core rules:
 - If a pronoun can point at two nouns, repeat the noun. If "this" points at a whole sentence rather than a noun, restate the noun ("this spread", "this check").
 - No semicolons, em-dashes, or en-dashes. No Latin abbreviations ("e.g." > "for example").
 - No marketing adjectives, no empty intensifiers. State claims plainly.
+- Self-contained hand-off: a message that reports status, lists next steps, or asks for a decision must make sense to a reader who has not seen earlier turns. A compaction summary is not the reader's memory. Spell out each step number, question number, option letter, or item code in words, or define it in a table in the same message.
 STE governs clarity, not volume. Do not pad; compression rules still apply.${substanceBlock()}${voiceBlock(cfg)}${strictExtra}${cfg.dict ? dictTier() : ""}${registerBlock(cfg)}
 
 Depth on demand: ${SKILL_DIR}/ (rules-reference.md = full 53-rule digest, dictionary.json = distilled substitutions, ste-lint.py = form check, writing-lint.py = report and optional voice checks).
