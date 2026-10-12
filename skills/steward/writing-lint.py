@@ -80,11 +80,12 @@ def undefined_references(text):
     return sorted(missing)
 
 
-def lint(text, report=False, voice=False, max_words=None):
+def lint(text, report=False, voice=False, max_words=None, handoff=False):
     body = strip_exempt(text)
     violations = {}
-    undefined = undefined_references(body)
-    violations["undefined_reference"] = len(undefined)
+    undefined = undefined_references(body) if handoff else []
+    if handoff:
+        violations["undefined_reference"] = len(undefined)
     if report:
         violations["missing_frontloaded_decision"] = 0 if DECISION.search(first_paragraph(body)) else 1
         violations["unranked_option_list"] = unranked_option_lists(body)
@@ -98,7 +99,7 @@ def lint(text, report=False, voice=False, max_words=None):
         violations["puffery"] = len(PUFFERY.findall(body))
     return {
         "words": words(body),
-        "profiles": [name for name, active in (("report", report), ("voice", voice)) if active],
+        "profiles": [name for name, active in (("report", report), ("voice", voice), ("handoff", handoff)) if active],
         "violations": violations,
         "undefined_references": undefined,
         "total": sum(violations.values()),
@@ -154,11 +155,13 @@ Approve option 1.
     assert precise["total"] == 0, precise
     quoted = lint('The report quotes "Experts believe this is a pivotal moment."', voice=True)
     assert quoted["total"] == 0, quoted
+    plain = lint("Next: step 2.")
+    assert plain["total"] == 0 and "undefined_reference" not in plain["violations"], plain
     handoff = lint("""Next steps
  - Next: step 2. The importer retries the upload.
  - After that: steps 3 to 7, then step 8, which is the Q3 plan you approved.
  Q11 is still open. I recommend yes.
-""")
+""", handoff=True)
     assert handoff["undefined_references"] == ["Q11", "Q3", "step 2", "step 3", "step 8"], handoff
     defined = lint("""| Code | Meaning |
 |---|---|
@@ -173,7 +176,7 @@ Items 2 and 3 get unit tests. Q11: I recommend option a.
 
 - (a) Add the flag.
 - (b) Do not add it.
-""")
+""", handoff=True)
     assert defined["violations"]["undefined_reference"] == 0, defined
     print("writing-lint selftest: passed")
 
@@ -183,6 +186,8 @@ def main():
     parser.add_argument("files", nargs="*")
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--voice", action="store_true")
+    parser.add_argument("--handoff", action="store_true",
+                        help="count step, question, option and item codes the message does not define")
     parser.add_argument("--max-words", type=int)
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
@@ -194,11 +199,11 @@ def main():
         expanded = sorted(glob.glob(value)) if any(char in value for char in "*?[") else [value]
         paths.extend(expanded)
     if not paths:
-        print(json.dumps(lint(sys.stdin.read(), args.report, args.voice, args.max_words), indent=2))
+        print(json.dumps(lint(sys.stdin.read(), args.report, args.voice, args.max_words, args.handoff), indent=2))
         return
     failed = False
     for value in paths:
-        result = lint(Path(value).read_text(), args.report, args.voice, args.max_words)
+        result = lint(Path(value).read_text(), args.report, args.voice, args.max_words, args.handoff)
         print(f"{Path(value).name:32} words={result['words']:4d} total={result['total']:3d} profiles={','.join(result['profiles']) or 'none'}")
         failed = failed or result["total"] > 0
     raise SystemExit(1 if failed else 0)

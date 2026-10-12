@@ -166,8 +166,9 @@ Durable report check:
 
 Optional voice check: `python3 writing-lint.py --voice draft.md`.
 
-Every run of `writing-lint.py` also counts `undefined_reference`: codes such
-as `step 2`, `Q11`, `D48`, or `A-O1` that this message does not define.
+Hand-off check: `python3 writing-lint.py --handoff draft.md` counts
+`undefined_reference`: codes such as `step 2`, `Q11`, `D48`, or `A-O1` that
+this message does not define.
 
 Use the before and after delta as the signal, not the absolute number.
 
