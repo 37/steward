@@ -167,8 +167,12 @@ Durable report check:
 Optional voice check: `python3 writing-lint.py --voice draft.md`.
 
 Hand-off check: `python3 writing-lint.py --handoff draft.md` counts
-`undefined_reference`: codes such as `step 2`, `Q11`, `D48`, or `A-O1` that
-this message does not define.
+`undefined_reference`: codes such as `step 2`, `Step 3`, `question 9`,
+`Q11`, `D48`, `F3a`, or `A-O1` that this message does not define. A table
+row, a list item, `CODE:`, or a markdown link (`[ALT-12](url)`) defines a
+code. Public names such as `UTF-8`, `SHA-256`, `P-256`, `EIP-155` and `S3`
+are not counted. The check cannot see a definition that covers a group
+("scenarios A01 to A25"), so treat each count as a prompt to look, not proof.
 
 Use the before and after delta as the signal, not the absolute number.
 
