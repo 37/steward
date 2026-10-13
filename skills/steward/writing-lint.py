@@ -18,11 +18,21 @@ RECOMMENDATION = re.compile(r"\b(recommend|rank(?:ed|ing)?|priority|preferred|be
 VAGUE_ATTRIBUTION = re.compile(r"\b(experts believe|industry reports suggest|some critics argue|many people say)\b", re.I)
 CHATBOT = re.compile(r"\b(i hope this helps|of course|certainly|great question|you(?:'|’)re absolutely right)\b", re.I)
 GENERIC_CONCLUSION = re.compile(r"\b(the future looks bright|only time will tell|this is just the beginning)\b", re.I)
-# Reference codes that only the writer's memory may define: "step 2", "Q11",
-# "D48", "A-O1", "item C", "option b".
+# Reference codes that only the writer's memory may define: "step 2", "Step 3",
+# "Q11", "D48", "F3a", "R6", "A-O1", "item C", "option b".
 REFERENCE = re.compile(
-    r"\b(?:(?P<word>steps?|items?|options?|phases?)\s+(?P<wid>\d+|[A-Za-z])\b"
-    r"|(?P<code>[QD]\d+[a-z]?|[A-Z]{1,3}-[A-Z]?\d+[a-z]?)\b)")
+    r"\b(?:(?P<word>(?i:steps?|items?|options?|phases?|questions?|fix(?:es)?))\s+(?P<wid>\d+|[A-Za-z])\b"
+    r"|(?P<code>[A-Z]{1,2}\d{1,2}[a-z]?|[A-Z]{1,3}-[A-Z]?\d+[a-z]?)\b)")
+# Public names that look like codes but need no definition: standards,
+# algorithms, curves, products ("UTF-8", "SHA-1", "P-256", "EIP-155", "S3").
+STANDARD_PREFIXES = {
+    "AES", "BIP", "CVE", "CWE", "EIP", "ERC", "ES", "HS", "ISO", "MD", "P", "PS",
+    "RFC", "RS", "SHA", "TLS", "UTF", "X", "IEC", "PEP", "W",
+}
+STANDARD_CODES = {
+    "S3", "EC2", "H1", "H2", "H3", "H4", "H5", "H6", "L1", "L2", "L3", "P0", "P1",
+    "P2", "P3", "P4", "E2", "K8", "G1", "G2",
+}
 PUFFERY = re.compile(r"\b(pivotal moment|testament to|evolving landscape|setting the stage|indelible mark|groundbreaking|game-changing)\b", re.I)
 
 
@@ -56,21 +66,36 @@ def unranked_option_lists(text):
     return count
 
 
+def _is_standard(code):
+    if code in STANDARD_CODES:
+        return True
+    prefix = re.match(r"[A-Z]+", code).group(0)
+    return "-" in code and prefix in STANDARD_PREFIXES
+
+
 def undefined_references(text):
     """Codes the message names but never defines. A numbered or lettered list
-    item defines "step N", "item N" and "option N"; a code defines itself when
-    a line starts with it (a table row, a list item, a heading) followed by a
-    separator, or when "CODE:" appears."""
+    item, or the first cell of a table row, defines "step N", "item N" and
+    "option N". A code defines itself when a line starts with it (a table row,
+    a list item, a heading) followed by a separator, when "CODE:" appears, or
+    when it is the text of a markdown link ("[ALT-12](url)")."""
     labels = set()
     for line in text.splitlines():
-        m = re.match(r"^\s*(?:[-*+]\s+)?(?:\*\*)?\(?([0-9]+|[A-Za-z])[.)]", line)
+        m = re.match(r"^\s*(?:[-*+]\s+)?(?:\*\*)?\(?([0-9]+|[A-Za-z])[.)]", line) \
+            or re.match(r"^\s*\|\s*(?:\*\*)?\(?(?:(?i:steps?|items?|options?|phases?|questions?|fix(?:es)?)\s+)?([0-9]+|[A-Za-z])\)?(?:\*\*)?\s*\|", line)
         if m:
             labels.add(m.group(1).lower())
     missing = set()
     for m in REFERENCE.finditer(text):
         if m.group("word"):
             if m.group("wid").lower() not in labels:
-                missing.add(f"{m.group('word').rstrip('s').lower()} {m.group('wid')}")
+                word = m.group("word").lower()
+                word = "fix" if word.startswith("fix") else word.rstrip("s")
+                missing.add(f"{word} {m.group('wid')}")
+            continue
+        if _is_standard(m.group("code")):
+            continue
+        if re.search(rf"\[[^\]]*\b{re.escape(m.group('code'))}\b[^\]]*\]\(", text):
             continue
         code = re.escape(m.group("code"))
         defined = re.search(rf"^\s*(?:[|#>*+-]\s*)*(?:\*\*)?{code}(?:\*\*)?\s*[|:.)\u2014-]", text, re.M) \
@@ -163,6 +188,23 @@ Approve option 1.
  Q11 is still open. I recommend yes.
 """, handoff=True)
     assert handoff["undefined_references"] == ["Q11", "Q3", "step 2", "step 3", "step 8"], handoff
+    wider = lint("""Steps 1 and 2 are done. Step 3 is next. F2 and F3a come after it.
+Fix 4 waits for R6. Question 9 is open.
+""", handoff=True)
+    assert wider["undefined_references"] == ["F2", "F3a", "R6", "fix 4", "question 9", "step 1", "step 3"], wider
+    public = lint("""It signs with P-256 and ES256, hashes with SHA-1 and SHA-256, reads
+UTF-8, follows EIP-155 and ISO-8601, and stores files in S3.
+See [ALT-1197](https://example.com/ALT-1197) for the gateway issue.
+""", handoff=True)
+    assert public["undefined_references"] == [], public
+    table = lint("""| Option | Retries on |
+|---|---|
+| a | Timeouts only |
+| b | Timeouts and 429 |
+
+Should I use option a or option b?
+""", handoff=True)
+    assert table["undefined_references"] == [], table
     defined = lint("""| Code | Meaning |
 |---|---|
 | Q11 | Add a dry-run flag to the importer. |
