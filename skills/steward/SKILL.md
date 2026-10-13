@@ -76,6 +76,13 @@ PUNCTUATION
 - No Latin abbreviations: e.g. → "for example", i.e. → "that is", etc. →
   drop it or "and so on" (GR-6).
 
+READER
+- Self-contained hand-off (R6). A message that reports status, lists next
+  steps, or asks for a decision must make sense to a reader who has not seen
+  earlier turns. A compaction summary is not the reader's memory. Spell out
+  each step number, question number, option letter, or item code ("step 2",
+  "Q11", "D48", "A-O1") in words, or define it in a table in the same message.
+
 Write only the requested text. No preamble, no summary, no closing remarks.
 
 ## Durable-report substance
@@ -149,6 +156,8 @@ Surface → mode map for this user's workflows:
 6. Same thing named two ways? Pick one name.
 7. Pronoun that can point at two nouns? Repeat the noun.
 8. Marketing adjective or empty intensifier? Delete it.
+9. A step number, question number, option letter, or item code with no
+   meaning in this message? Spell it out, or add a table.
 
 Mechanical form check: `python3 ste-lint.py draft.md`.
 
@@ -156,6 +165,10 @@ Durable report check:
 `python3 writing-lint.py --report --max-words 400 draft.md`.
 
 Optional voice check: `python3 writing-lint.py --voice draft.md`.
+
+Hand-off check: `python3 writing-lint.py --handoff draft.md` counts
+`undefined_reference`: codes such as `step 2`, `Q11`, `D48`, or `A-O1` that
+this message does not define.
 
 Use the before and after delta as the signal, not the absolute number.
 

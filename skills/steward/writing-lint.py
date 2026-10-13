@@ -18,6 +18,11 @@ RECOMMENDATION = re.compile(r"\b(recommend|rank(?:ed|ing)?|priority|preferred|be
 VAGUE_ATTRIBUTION = re.compile(r"\b(experts believe|industry reports suggest|some critics argue|many people say)\b", re.I)
 CHATBOT = re.compile(r"\b(i hope this helps|of course|certainly|great question|you(?:'|’)re absolutely right)\b", re.I)
 GENERIC_CONCLUSION = re.compile(r"\b(the future looks bright|only time will tell|this is just the beginning)\b", re.I)
+# Reference codes that only the writer's memory may define: "step 2", "Q11",
+# "D48", "A-O1", "item C", "option b".
+REFERENCE = re.compile(
+    r"\b(?:(?P<word>steps?|items?|options?|phases?)\s+(?P<wid>\d+|[A-Za-z])\b"
+    r"|(?P<code>[QD]\d+[a-z]?|[A-Z]{1,3}-[A-Z]?\d+[a-z]?)\b)")
 PUFFERY = re.compile(r"\b(pivotal moment|testament to|evolving landscape|setting the stage|indelible mark|groundbreaking|game-changing)\b", re.I)
 
 
@@ -51,9 +56,36 @@ def unranked_option_lists(text):
     return count
 
 
-def lint(text, report=False, voice=False, max_words=None):
+def undefined_references(text):
+    """Codes the message names but never defines. A numbered or lettered list
+    item defines "step N", "item N" and "option N"; a code defines itself when
+    a line starts with it (a table row, a list item, a heading) followed by a
+    separator, or when "CODE:" appears."""
+    labels = set()
+    for line in text.splitlines():
+        m = re.match(r"^\s*(?:[-*+]\s+)?(?:\*\*)?\(?([0-9]+|[A-Za-z])[.)]", line)
+        if m:
+            labels.add(m.group(1).lower())
+    missing = set()
+    for m in REFERENCE.finditer(text):
+        if m.group("word"):
+            if m.group("wid").lower() not in labels:
+                missing.add(f"{m.group('word').rstrip('s').lower()} {m.group('wid')}")
+            continue
+        code = re.escape(m.group("code"))
+        defined = re.search(rf"^\s*(?:[|#>*+-]\s*)*(?:\*\*)?{code}(?:\*\*)?\s*[|:.)\u2014-]", text, re.M) \
+            or re.search(rf"\b{code}(?:\*\*)?:", text)
+        if not defined:
+            missing.add(m.group("code"))
+    return sorted(missing)
+
+
+def lint(text, report=False, voice=False, max_words=None, handoff=False):
     body = strip_exempt(text)
     violations = {}
+    undefined = undefined_references(body) if handoff else []
+    if handoff:
+        violations["undefined_reference"] = len(undefined)
     if report:
         violations["missing_frontloaded_decision"] = 0 if DECISION.search(first_paragraph(body)) else 1
         violations["unranked_option_list"] = unranked_option_lists(body)
@@ -67,8 +99,9 @@ def lint(text, report=False, voice=False, max_words=None):
         violations["puffery"] = len(PUFFERY.findall(body))
     return {
         "words": words(body),
-        "profiles": [name for name, active in (("report", report), ("voice", voice)) if active],
+        "profiles": [name for name, active in (("report", report), ("voice", voice), ("handoff", handoff)) if active],
         "violations": violations,
+        "undefined_references": undefined,
         "total": sum(violations.values()),
         "truth_verified": False,
         "truth_note": "Verify material claims against source evidence. This linter checks classification, not truth.",
@@ -122,6 +155,29 @@ Approve option 1.
     assert precise["total"] == 0, precise
     quoted = lint('The report quotes "Experts believe this is a pivotal moment."', voice=True)
     assert quoted["total"] == 0, quoted
+    plain = lint("Next: step 2.")
+    assert plain["total"] == 0 and "undefined_reference" not in plain["violations"], plain
+    handoff = lint("""Next steps
+ - Next: step 2. The importer retries the upload.
+ - After that: steps 3 to 7, then step 8, which is the Q3 plan you approved.
+ Q11 is still open. I recommend yes.
+""", handoff=True)
+    assert handoff["undefined_references"] == ["Q11", "Q3", "step 2", "step 3", "step 8"], handoff
+    defined = lint("""| Code | Meaning |
+|---|---|
+| Q11 | Add a dry-run flag to the importer. |
+
+Next, in this order:
+1. The importer retries uploads.
+2. The export command retries.
+3. The parser reads fewer files.
+
+Items 2 and 3 get unit tests. Q11: I recommend option a.
+
+- (a) Add the flag.
+- (b) Do not add it.
+""", handoff=True)
+    assert defined["violations"]["undefined_reference"] == 0, defined
     print("writing-lint selftest: passed")
 
 
@@ -130,6 +186,8 @@ def main():
     parser.add_argument("files", nargs="*")
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--voice", action="store_true")
+    parser.add_argument("--handoff", action="store_true",
+                        help="count step, question, option and item codes the message does not define")
     parser.add_argument("--max-words", type=int)
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
@@ -141,11 +199,11 @@ def main():
         expanded = sorted(glob.glob(value)) if any(char in value for char in "*?[") else [value]
         paths.extend(expanded)
     if not paths:
-        print(json.dumps(lint(sys.stdin.read(), args.report, args.voice, args.max_words), indent=2))
+        print(json.dumps(lint(sys.stdin.read(), args.report, args.voice, args.max_words, args.handoff), indent=2))
         return
     failed = False
     for value in paths:
-        result = lint(Path(value).read_text(), args.report, args.voice, args.max_words)
+        result = lint(Path(value).read_text(), args.report, args.voice, args.max_words, args.handoff)
         print(f"{Path(value).name:32} words={result['words']:4d} total={result['total']:3d} profiles={','.join(result['profiles']) or 'none'}")
         failed = failed or result["total"] > 0
     raise SystemExit(1 if failed else 0)

@@ -18,6 +18,7 @@ assert.doesNotMatch(plain, /VOICE PROFILE ACTIVE/, "plain excludes voice rules")
 assert.match(plain, /plain profile excludes marketing copy and prose that needs a personal voice/i, "plain states its scope boundary");
 assert.doesNotMatch(plain, /writing-for-agents/, "the unrelated agent-document skill is not loaded");
 assert.equal((plain.match(/Durable-report substance rules/g) || []).length, 1, "the substance layer has one runtime source");
+assert.match(plain, /Self-contained hand-off/, "lite carries the self-contained hand-off rule (R6)");
 const strict = core.instructions("strict", core.readConfig());
 assert.match(strict, /Durable-report substance rules/, "strict carries the durable-report substance layer");
 
